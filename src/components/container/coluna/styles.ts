@@ -1,0 +1,29 @@
+import styled from "styled-components"
+
+export const _HeaderColuna = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px
+`
+export const _Coluna = styled.div`
+    display : flex;
+    flex-direction: column;
+    background-color: #f6fafd;
+    color: white;
+    min-width: max-content;
+    padding: 10px;
+    gap: 10px;
+    border-radius: 10px;
+    border: 2px dashed #8da9f0;
+    align-self: flex-start;
+`
+export const _Titulo = styled.input`
+    background-color: transparent;
+    text-transform: uppercase;
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+`
