@@ -17,5 +17,6 @@ export const Header = () => {
   return <S._Header>
     <S._TextoData>{data}</S._TextoData>
     <S._TextoSaudacao>{Saudacao()}. Foque no Essencial</S._TextoSaudacao>
+    <p>Se você é freelancer e não esta se sentindo tão produtivo esse projeto é para você</p>
     </S._Header>;
 };

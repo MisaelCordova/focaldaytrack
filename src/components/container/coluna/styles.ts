@@ -23,7 +23,12 @@ export const _Titulo = styled.input`
     text-transform: uppercase;
     width: 100%;
     padding: 8px;
-    border: none;
+    border: 1px solid transparent;
     border-radius: 10px;
     font-weight: 700;
+    
+    &:focus {
+        outline:none;
+        border: 1px solid #e2e8f0;
+    }
 `

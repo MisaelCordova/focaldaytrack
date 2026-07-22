@@ -1,7 +1,9 @@
 :root {
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
+
+
 
   font-family: var(--sans);
   color: #111827;

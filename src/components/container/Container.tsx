@@ -4,13 +4,21 @@ import { Coluna } from "./coluna/Coluna";
 
 import * as S from "./styles";
 
+interface IColuna {
+  id: number;
+  texto: string;
+}
+
 export const Container = () => {
-  const [colunas, setColunas] = useState<string[]>([]);
+  const [colunas, setColunas] = useState<IColuna[]>([]);
 
   function adicionarColuna() {
     setColunas((colunasAtuais) => [
       ...colunasAtuais,
-      "",
+    {
+      id: colunas.length + 1,
+      texto: ""
+    },
       
     ]);
   }
@@ -18,7 +26,7 @@ export const Container = () => {
   return (
     <S._Container>
       {colunas && colunas.map((coluna) => (
-        <Coluna key={coluna} text={coluna} />
+        <Coluna key={coluna.id} text={coluna.texto} />
       ))}
       <Button onClick={() => adicionarColuna()} text="Adicionar Coluna" style={{ height: "fit-content" }} />
     </S._Container>
