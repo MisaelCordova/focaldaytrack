@@ -10,8 +10,9 @@ export const _Coluna = styled.div`
     display : flex;
     flex-direction: column;
     background-color: #f6fafd;
-    color: white;
-    min-width: max-content;
+    min-width: 280px;
+    width: 280px;
+    flex-shrink: 0;
     padding: 10px;
     gap: 10px;
     border-radius: 10px;

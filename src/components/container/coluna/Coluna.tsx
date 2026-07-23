@@ -2,49 +2,62 @@ import * as S from "./styles";
 import IconeTimer from "../../../assets/iconeTimer.svg?react";
 import IconeDelete from "../../../assets/iconeDelete.svg?react";
 import { Button } from "../../Button/Button";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Tarefa } from "./tarefa/Tarefa";
-import type { ITarefa } from "../../../interfaces/Interfaces";
+import type { IColuna } from "../../../interfaces/Interfaces";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useDroppable } from "@dnd-kit/core";
 
 interface IColunaProps {
-  text?: string;
+  coluna: IColuna;
+  onAdicionarTarefa: (colunaId: string) => void;
+  onAtualizarTarefa: (tarefaId: string, descricao: string) => void;
+  onAtualizarTitulo: (colunaId: string, texto: string) => void;
 }
 
-
-export const Coluna = (props: IColunaProps) => {
+export const Coluna = ({
+  coluna,
+  onAdicionarTarefa,
+  onAtualizarTarefa,
+  onAtualizarTitulo,
+}: IColunaProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [texto, setTexto] = useState(props.text);
-  const [terefas, setTarefas] = useState<ITarefa[]>([]);
+  const { setNodeRef } = useDroppable({ id: coluna.id });
 
-  function adicionarTarefa() {
- 
-    setTarefas((colunasAtuais) => [
-      ...colunasAtuais,
-      {
-        id: terefas.length + 1,
-        descricao: "",
-      },
-    ]);
-  }
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
   return (
-    <S._Coluna>
+    <S._Coluna ref={setNodeRef}>
       <S._HeaderColuna>
         <S._Titulo
           ref={inputRef}
-          value={texto}
-          onChange={(e) => setTexto(e.target.value)}
+          value={coluna.texto}
+          onChange={(e) => onAtualizarTitulo(coluna.id, e.target.value)}
         ></S._Titulo>
         <IconeTimer />
         <IconeDelete />
       </S._HeaderColuna>
-      {terefas &&
-        terefas.map((tarefa) => (
-          <Tarefa key={tarefa.id} {...tarefa} />
+      <SortableContext
+        items={coluna.tarefas.map((tarefa) => tarefa.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        {coluna.tarefas.map((tarefa) => (
+          <Tarefa
+            key={tarefa.id}
+            {...tarefa}
+            onAtualizarDescricao={onAtualizarTarefa}
+          />
         ))}
-      <Button text="Adicionar tarefa" onClick={() => adicionarTarefa()} />
+      </SortableContext>
+      <Button
+        text="Adicionar tarefa"
+        onClick={() => onAdicionarTarefa(coluna.id)}
+      />
     </S._Coluna>
   );
 };

@@ -11,6 +11,11 @@ export const _CardTarefa = styled.div`
     border: 1px solid #e2e8f0;
     box-shadow: 0px 0px 2px 1px  #e2e8f0;
     max-height: fit-content;
+    touch-action: none;
+
+    &[data-dragging="true"] {
+        opacity: 0.6;
+    }
 `
 export const _Texto = styled.textarea`
     resize: none;
@@ -18,6 +23,7 @@ export const _Texto = styled.textarea`
     height: auto;
     width: 100%;
     padding: 8px;
+    overflow: hidden;
     border: none;
     border-radius: 10px;
     &:focus {

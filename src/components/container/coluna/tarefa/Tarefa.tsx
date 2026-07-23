@@ -1,14 +1,33 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as S from "./styles";
 import type { ITarefa } from "../../../../interfaces/Interfaces";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
-export const Tarefa = ({ id, descricao }: ITarefa) => {
+interface ITarefaProps extends ITarefa {
+  onAtualizarDescricao: (tarefaId: string, descricao: string) => void;
+}
+
+export const Tarefa = ({
+  id,
+  descricao,
+  onAtualizarDescricao,
+}: ITarefaProps) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [descricaoTarefa, setDescricaoTarefa] = useState<string>(descricao);
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
-  function autoResize(event: React.ChangeEvent<HTMLTextAreaElement>) {
-    const textarea = event.target;
-
+  function ajustarAltura(textarea: HTMLTextAreaElement) {
     textarea.style.height = "auto";
     textarea.style.height = `${textarea.scrollHeight}px`;
   }
@@ -16,18 +35,31 @@ export const Tarefa = ({ id, descricao }: ITarefa) => {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (!inputRef.current) return;
+
+    ajustarAltura(inputRef.current);
+  }, [descricao]);
+
   return (
-    <S._CardTarefa>
+    <S._CardTarefa
+      ref={setNodeRef}
+      style={style}
+      data-dragging={isDragging}
+      {...attributes}
+      {...listeners}
+    >
       <S._Texto
         id={`tarefa-${id}-descricao`}
         name={`tarefas.${id}.descricao`}
         aria-label="Descricao da tarefa"
         ref={inputRef}
         rows={1}
-        value={descricaoTarefa}
+        value={descricao}
         onChange={(e) => {
-          setDescricaoTarefa(e.target.value);
-          autoResize(e);
+          onAtualizarDescricao(id, e.target.value);
+          ajustarAltura(e.target);
         }}
       />
     </S._CardTarefa>
