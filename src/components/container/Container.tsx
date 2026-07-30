@@ -11,7 +11,7 @@ import {
 import { arrayMove } from "@dnd-kit/sortable";
 import { Button } from "../Button/Button";
 import { Coluna } from "./coluna/Coluna";
-
+import IconeAdd from "../../assets/iconeAdd.svg?react";
 import * as S from "./styles";
 import type { IColuna, ITarefa } from "../../interfaces/Interfaces";
 
@@ -224,7 +224,8 @@ export const Container = () => {
         <Button
           onClick={() => adicionarColuna()}
           text="Adicionar Coluna"
-          style={{ height: "fit-content" }}
+          icone={<IconeAdd />}
+          style={{ height: "fit-content", backgroundColor: "#3665e4" }}
         />
       </S._Container>
     </DndContext>

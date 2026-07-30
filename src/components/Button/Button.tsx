@@ -1,6 +1,5 @@
 import type { JSX, ReactNode } from "react";
 import * as S from "./styles";
-import IconeAdd from "../../assets/iconeAdd.svg?react";
 import type { CSSProperties } from "styled-components";
 
 interface IButtonsProps {
@@ -12,7 +11,7 @@ interface IButtonsProps {
 export const Button = (props: IButtonsProps) => {
   return (
     <S._Button onClick={props.onClick} style={props.style}>
-      <IconeAdd />
+      {props.icone && props.icone}
       {props.text}
     </S._Button>
   );

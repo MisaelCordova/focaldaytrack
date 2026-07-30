@@ -10,7 +10,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
-
+import IconeAdd from "../../../assets/iconeAdd.svg?react";
 interface IColunaProps {
   coluna: IColuna;
   onAdicionarTarefa: (colunaId: string) => void;
@@ -50,6 +50,9 @@ export const Coluna = ({
     event.currentTarget.blur();
   }
 
+
+
+
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
@@ -65,7 +68,12 @@ export const Coluna = ({
           onKeyDown={handleTituloKeyDown}
         ></S._Titulo>
         <IconeTimer />
-        <IconeDelete />
+        <Button 
+         onClick={() => onRemoverColuna(coluna.id)}
+          style={{boxShadow:"none"}}
+          icone={ <IconeDelete />}
+        />
+       
       </S._HeaderColuna>
       <SortableContext
         items={coluna.tarefas.map((tarefa) => tarefa.id)}
@@ -82,6 +90,8 @@ export const Coluna = ({
       </SortableContext>
       <Button
         text="Adicionar tarefa"
+        icone={<IconeAdd />}
+        style={{backgroundColor: "#3665e4"}}
         onClick={() => onAdicionarTarefa(coluna.id)}
       />
     </S._Coluna>
