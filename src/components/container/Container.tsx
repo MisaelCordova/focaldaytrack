@@ -68,6 +68,21 @@ export const Container = () => {
     );
   }
 
+  function removerColuna(colunaId: string) {
+    setColunas((colunasAtuais) =>
+      colunasAtuais.filter((coluna) => coluna.id !== colunaId)
+    );
+  }
+
+  function removerTarefa(tarefaId: string) {
+    setColunas((colunasAtuais) =>
+      colunasAtuais.map((coluna) => ({
+        ...coluna,
+        tarefas: coluna.tarefas.filter((tarefa) => tarefa.id !== tarefaId),
+      }))
+    );
+  }
+
   function atualizarTarefa(tarefaId: string, descricao: string) {
     setColunas((colunasAtuais) =>
       colunasAtuais.map((coluna) => ({
@@ -202,6 +217,8 @@ export const Container = () => {
             onAdicionarTarefa={adicionarTarefa}
             onAtualizarTarefa={atualizarTarefa}
             onAtualizarTitulo={atualizarTituloColuna}
+            onRemoverColuna={removerColuna}
+            onRemoverTarefa={removerTarefa}
           />
         ))}
         <Button

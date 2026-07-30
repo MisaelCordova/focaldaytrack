@@ -6,12 +6,14 @@ import { CSS } from "@dnd-kit/utilities";
 
 interface ITarefaProps extends ITarefa {
   onAtualizarDescricao: (tarefaId: string, descricao: string) => void;
+  onRemoverTarefa: (tarefaId: string) => void;
 }
 
 export const Tarefa = ({
   id,
   descricao,
   onAtualizarDescricao,
+  onRemoverTarefa,
 }: ITarefaProps) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const {
@@ -30,6 +32,27 @@ export const Tarefa = ({
   function ajustarAltura(textarea: HTMLTextAreaElement) {
     textarea.style.height = "auto";
     textarea.style.height = `${textarea.scrollHeight}px`;
+  }
+
+  function removerTarefaSeVazia() {
+    if (descricao.trim()) return;
+
+    onRemoverTarefa(id);
+  }
+
+  function handleDescricaoKeyDown(
+    event: React.KeyboardEvent<HTMLTextAreaElement>
+  ) {
+    if (event.key !== "Enter" || event.shiftKey) return;
+
+    event.preventDefault();
+
+    if (!descricao.trim()) {
+      onRemoverTarefa(id);
+      return;
+    }
+
+    event.currentTarget.blur();
   }
 
   useEffect(() => {
@@ -61,6 +84,8 @@ export const Tarefa = ({
           onAtualizarDescricao(id, e.target.value);
           ajustarAltura(e.target);
         }}
+        onBlur={removerTarefaSeVazia}
+        onKeyDown={handleDescricaoKeyDown}
       />
     </S._CardTarefa>
   );

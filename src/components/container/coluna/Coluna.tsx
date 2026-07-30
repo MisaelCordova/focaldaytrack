@@ -16,6 +16,8 @@ interface IColunaProps {
   onAdicionarTarefa: (colunaId: string) => void;
   onAtualizarTarefa: (tarefaId: string, descricao: string) => void;
   onAtualizarTitulo: (colunaId: string, texto: string) => void;
+  onRemoverColuna: (colunaId: string) => void;
+  onRemoverTarefa: (tarefaId: string) => void;
 }
 
 export const Coluna = ({
@@ -23,9 +25,30 @@ export const Coluna = ({
   onAdicionarTarefa,
   onAtualizarTarefa,
   onAtualizarTitulo,
+  onRemoverColuna,
+  onRemoverTarefa,
 }: IColunaProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { setNodeRef } = useDroppable({ id: coluna.id });
+
+  function removerColunaSeVazia() {
+    if (coluna.texto.trim()) return;
+
+    onRemoverColuna(coluna.id);
+  }
+
+  function handleTituloKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key !== "Enter") return;
+
+    event.preventDefault();
+
+    if (!coluna.texto.trim()) {
+      onRemoverColuna(coluna.id);
+      return;
+    }
+
+    event.currentTarget.blur();
+  }
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -38,6 +61,8 @@ export const Coluna = ({
           ref={inputRef}
           value={coluna.texto}
           onChange={(e) => onAtualizarTitulo(coluna.id, e.target.value)}
+          onBlur={removerColunaSeVazia}
+          onKeyDown={handleTituloKeyDown}
         ></S._Titulo>
         <IconeTimer />
         <IconeDelete />
@@ -51,6 +76,7 @@ export const Coluna = ({
             key={tarefa.id}
             {...tarefa}
             onAtualizarDescricao={onAtualizarTarefa}
+            onRemoverTarefa={onRemoverTarefa}
           />
         ))}
       </SortableContext>
