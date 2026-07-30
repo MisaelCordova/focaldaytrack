@@ -4,7 +4,7 @@ import IconeDelete from "../../../assets/iconeDelete.svg?react";
 import { Button } from "../../Button/Button";
 import { useEffect, useRef } from "react";
 import { Tarefa } from "./tarefa/Tarefa";
-import type { IColuna } from "../../../interfaces/Interfaces";
+import type { IColuna, ITarefa } from "../../../interfaces/Interfaces";
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -19,6 +19,7 @@ interface IColunaProps {
   onRemoverColuna: (colunaId: string) => void;
   onSolicitarRemocaoColuna: (coluna: IColuna) => void;
   onRemoverTarefa: (tarefaId: string) => void;
+  onSolicitarRemocaoTarefa: (tarefa: ITarefa) => void;
 }
 
 export const Coluna = ({
@@ -29,6 +30,7 @@ export const Coluna = ({
   onRemoverColuna,
   onSolicitarRemocaoColuna,
   onRemoverTarefa,
+  onSolicitarRemocaoTarefa,
 }: IColunaProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { setNodeRef } = useDroppable({ id: coluna.id });
@@ -87,6 +89,7 @@ export const Coluna = ({
             {...tarefa}
             onAtualizarDescricao={onAtualizarTarefa}
             onRemoverTarefa={onRemoverTarefa}
+            onSolicitarRemocaoTarefa={onSolicitarRemocaoTarefa}
           />
         ))}
       </SortableContext>

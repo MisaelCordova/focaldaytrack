@@ -3,10 +3,12 @@ import * as S from "./styles";
 import type { ITarefa } from "../../../../interfaces/Interfaces";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import IconeDelete from "../../../../assets/iconeDelete.svg?react";
 
 interface ITarefaProps extends ITarefa {
   onAtualizarDescricao: (tarefaId: string, descricao: string) => void;
   onRemoverTarefa: (tarefaId: string) => void;
+  onSolicitarRemocaoTarefa: (tarefa: ITarefa) => void;
 }
 
 export const Tarefa = ({
@@ -14,6 +16,7 @@ export const Tarefa = ({
   descricao,
   onAtualizarDescricao,
   onRemoverTarefa,
+  onSolicitarRemocaoTarefa,
 }: ITarefaProps) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const {
@@ -87,6 +90,17 @@ export const Tarefa = ({
         onBlur={removerTarefaSeVazia}
         onKeyDown={handleDescricaoKeyDown}
       />
+      <S._DeleteButton
+        type="button"
+        aria-label="Excluir tarefa"
+        onPointerDown={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.stopPropagation();
+          onSolicitarRemocaoTarefa({ id, descricao });
+        }}
+      >
+        <IconeDelete />
+      </S._DeleteButton>
     </S._CardTarefa>
   );
 };

@@ -21,6 +21,9 @@ export const Container = () => {
   const [colunaParaExcluir, setColunaParaExcluir] = useState<IColuna | null>(
     null
   );
+  const [tarefaParaExcluir, setTarefaParaExcluir] = useState<ITarefa | null>(
+    null
+  );
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -92,6 +95,13 @@ export const Container = () => {
         tarefas: coluna.tarefas.filter((tarefa) => tarefa.id !== tarefaId),
       }))
     );
+  }
+
+  function confirmarRemocaoTarefa() {
+    if (!tarefaParaExcluir) return;
+
+    removerTarefa(tarefaParaExcluir.id);
+    setTarefaParaExcluir(null);
   }
 
   function atualizarTarefa(tarefaId: string, descricao: string) {
@@ -231,6 +241,7 @@ export const Container = () => {
             onRemoverColuna={removerColuna}
             onSolicitarRemocaoColuna={setColunaParaExcluir}
             onRemoverTarefa={removerTarefa}
+            onSolicitarRemocaoTarefa={setTarefaParaExcluir}
           />
         ))}
         <Button
@@ -250,6 +261,18 @@ export const Container = () => {
           cancelText="Cancelar"
           onConfirm={confirmarRemocaoColuna}
           onCancel={() => setColunaParaExcluir(null)}
+        />
+      )}
+      {tarefaParaExcluir && (
+        <ConfirmModal
+          title="Excluir tarefa?"
+          description={`A tarefa "${
+            tarefaParaExcluir.descricao.trim() || "Sem descricao"
+          }" sera removida.`}
+          confirmText="Excluir"
+          cancelText="Cancelar"
+          onConfirm={confirmarRemocaoTarefa}
+          onCancel={() => setTarefaParaExcluir(null)}
         />
       )}
     </DndContext>

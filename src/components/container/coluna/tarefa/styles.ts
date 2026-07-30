@@ -16,6 +16,12 @@ export const _CardTarefa = styled.div`
     &[data-dragging="true"] {
         opacity: 0.6;
     }
+
+    &:hover button,
+    &:focus-within button {
+        opacity: 1;
+        pointer-events: auto;
+    }
 `
 export const _Texto = styled.textarea`
     resize: none;
@@ -29,5 +35,31 @@ export const _Texto = styled.textarea`
     &:focus {
         outline:none;
         
+    }
+`
+
+export const _DeleteButton = styled.button`
+    display: flex;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    color: #ef4444;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+
+    &:hover,
+    &:focus-visible {
+        background-color: #e2f0fe;
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    svg {
+        width: 16px;
+        height: 16px;
     }
 `
