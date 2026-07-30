@@ -17,6 +17,7 @@ interface IColunaProps {
   onAtualizarTarefa: (tarefaId: string, descricao: string) => void;
   onAtualizarTitulo: (colunaId: string, texto: string) => void;
   onRemoverColuna: (colunaId: string) => void;
+  onSolicitarRemocaoColuna: (coluna: IColuna) => void;
   onRemoverTarefa: (tarefaId: string) => void;
 }
 
@@ -26,6 +27,7 @@ export const Coluna = ({
   onAtualizarTarefa,
   onAtualizarTitulo,
   onRemoverColuna,
+  onSolicitarRemocaoColuna,
   onRemoverTarefa,
 }: IColunaProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -68,10 +70,10 @@ export const Coluna = ({
           onKeyDown={handleTituloKeyDown}
         ></S._Titulo>
         <IconeTimer />
-        <Button 
-         onClick={() => onRemoverColuna(coluna.id)}
-          style={{boxShadow:"none"}}
-          icone={ <IconeDelete />}
+        <Button
+          onClick={() => onSolicitarRemocaoColuna(coluna)}
+          style={{ boxShadow: "none" }}
+          icone={<IconeDelete />}
         />
        
       </S._HeaderColuna>

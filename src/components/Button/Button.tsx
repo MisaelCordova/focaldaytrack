@@ -10,7 +10,7 @@ interface IButtonsProps {
 }
 export const Button = (props: IButtonsProps) => {
   return (
-    <S._Button onClick={props.onClick} style={props.style}>
+    <S._Button type="button" onClick={props.onClick} style={props.style}>
       {props.icone && props.icone}
       {props.text}
     </S._Button>

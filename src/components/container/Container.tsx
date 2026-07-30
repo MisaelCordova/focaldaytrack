@@ -12,11 +12,15 @@ import { arrayMove } from "@dnd-kit/sortable";
 import { Button } from "../Button/Button";
 import { Coluna } from "./coluna/Coluna";
 import IconeAdd from "../../assets/iconeAdd.svg?react";
+import { ConfirmModal } from "../ConfirmModal/ConfirmModal";
 import * as S from "./styles";
 import type { IColuna, ITarefa } from "../../interfaces/Interfaces";
 
 export const Container = () => {
   const [colunas, setColunas] = useState<IColuna[]>([]);
+  const [colunaParaExcluir, setColunaParaExcluir] = useState<IColuna | null>(
+    null
+  );
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -72,6 +76,13 @@ export const Container = () => {
     setColunas((colunasAtuais) =>
       colunasAtuais.filter((coluna) => coluna.id !== colunaId)
     );
+  }
+
+  function confirmarRemocaoColuna() {
+    if (!colunaParaExcluir) return;
+
+    removerColuna(colunaParaExcluir.id);
+    setColunaParaExcluir(null);
   }
 
   function removerTarefa(tarefaId: string) {
@@ -218,6 +229,7 @@ export const Container = () => {
             onAtualizarTarefa={atualizarTarefa}
             onAtualizarTitulo={atualizarTituloColuna}
             onRemoverColuna={removerColuna}
+            onSolicitarRemocaoColuna={setColunaParaExcluir}
             onRemoverTarefa={removerTarefa}
           />
         ))}
@@ -228,6 +240,18 @@ export const Container = () => {
           style={{ height: "fit-content", backgroundColor: "#3665e4" }}
         />
       </S._Container>
+      {colunaParaExcluir && (
+        <ConfirmModal
+          title="Excluir coluna?"
+          description={`A coluna "${
+            colunaParaExcluir.texto.toUpperCase() || "Sem titulo"
+          }" e suas tarefas serao removidas.`}
+          confirmText="Excluir"
+          cancelText="Cancelar"
+          onConfirm={confirmarRemocaoColuna}
+          onCancel={() => setColunaParaExcluir(null)}
+        />
+      )}
     </DndContext>
   );
 };
