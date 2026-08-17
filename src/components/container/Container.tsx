@@ -22,10 +22,46 @@ type CronometroTarefa = {
   msAcumulados: number;
 };
 
+const COLUNAS_STORAGE_KEY = "@FocalDayTrack:colunas";
 const getTimestamp = () => performance.now();
 
+function isTarefa(valor: unknown): valor is ITarefa {
+  if (!valor || typeof valor !== "object") return false;
+
+  const tarefa = valor as ITarefa;
+
+  return typeof tarefa.id === "string" && typeof tarefa.descricao === "string";
+}
+
+function isColuna(valor: unknown): valor is IColuna {
+  if (!valor || typeof valor !== "object") return false;
+
+  const coluna = valor as IColuna;
+
+  return (
+    typeof coluna.id === "string" &&
+    typeof coluna.texto === "string" &&
+    Array.isArray(coluna.tarefas) &&
+    coluna.tarefas.every(isTarefa)
+  );
+}
+
+function carregarColunasSalvas() {
+  const colunasSalvas = localStorage.getItem(COLUNAS_STORAGE_KEY);
+
+  if (!colunasSalvas) return [];
+
+  try {
+    const colunas = JSON.parse(colunasSalvas);
+
+    return Array.isArray(colunas) && colunas.every(isColuna) ? colunas : [];
+  } catch {
+    return [];
+  }
+}
+
 export const Container = () => {
-  const [colunas, setColunas] = useState<IColuna[]>([]);
+  const [colunas, setColunas] = useState<IColuna[]>(carregarColunasSalvas);
   const [colunaParaExcluir, setColunaParaExcluir] = useState<IColuna | null>(
     null,
   );
@@ -51,6 +87,10 @@ export const Container = () => {
   const existeCronometroRodando = Object.values(cronometrosPorTarefa).some(
     (cronometroTarefa) => cronometroTarefa.rodando,
   );
+
+  useEffect(() => {
+    localStorage.setItem(COLUNAS_STORAGE_KEY, JSON.stringify(colunas));
+  }, [colunas]);
 
   useEffect(() => {
     if (!existeCronometroRodando) return;
