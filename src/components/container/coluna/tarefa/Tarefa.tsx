@@ -4,8 +4,11 @@ import type { ITarefa } from "../../../../interfaces/Interfaces";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import IconeDelete from "../../../../assets/iconeDelete.svg?react";
+import { Cronometro } from "../../../Cronometro/Cronometro";
 
 interface ITarefaProps extends ITarefa {
+  cronometro: boolean;
+  colunaComCronometroAtivo: boolean;
   onAtualizarDescricao: (tarefaId: string, descricao: string) => void;
   onRemoverTarefa: (tarefaId: string) => void;
   onSolicitarRemocaoTarefa: (tarefa: ITarefa) => void;
@@ -14,6 +17,8 @@ interface ITarefaProps extends ITarefa {
 export const Tarefa = ({
   id,
   descricao,
+  cronometro,
+  colunaComCronometroAtivo,
   onAtualizarDescricao,
   onRemoverTarefa,
   onSolicitarRemocaoTarefa,
@@ -44,7 +49,7 @@ export const Tarefa = ({
   }
 
   function handleDescricaoKeyDown(
-    event: React.KeyboardEvent<HTMLTextAreaElement>
+    event: React.KeyboardEvent<HTMLTextAreaElement>,
   ) {
     if (event.key !== "Enter" || event.shiftKey) return;
 
@@ -76,31 +81,36 @@ export const Tarefa = ({
       {...attributes}
       {...listeners}
     >
-      <S._Texto
-        id={`tarefa-${id}-descricao`}
-        name={`tarefas.${id}.descricao`}
-        aria-label="Descricao da tarefa"
-        ref={inputRef}
-        rows={1}
-        value={descricao}
-        onChange={(e) => {
-          onAtualizarDescricao(id, e.target.value);
-          ajustarAltura(e.target);
-        }}
-        onBlur={removerTarefaSeVazia}
-        onKeyDown={handleDescricaoKeyDown}
-      />
-      <S._DeleteButton
-        type="button"
-        aria-label="Excluir tarefa"
-        onPointerDown={(event) => event.stopPropagation()}
-        onClick={(event) => {
-          event.stopPropagation();
-          onSolicitarRemocaoTarefa({ id, descricao });
-        }}
-      >
-        <IconeDelete />
-      </S._DeleteButton>
+      <S._HeaderCard>
+        <S._Texto
+          id={`tarefa-${id}-descricao`}
+          name={`tarefas.${id}.descricao`}
+          aria-label="Descricao da tarefa"
+          ref={inputRef}
+          rows={1}
+          value={descricao}
+          onChange={(e) => {
+            onAtualizarDescricao(id, e.target.value);
+            ajustarAltura(e.target);
+          }}
+          onBlur={removerTarefaSeVazia}
+          onKeyDown={handleDescricaoKeyDown}
+        />
+        <S._DeleteButton
+          type="button"
+          aria-label="Excluir tarefa"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation();
+            onSolicitarRemocaoTarefa({ id, descricao });
+          }}
+        >
+          <IconeDelete />
+        </S._DeleteButton>
+      </S._HeaderCard>
+      {cronometro && (
+        <Cronometro colunaComCronometroAtivo={colunaComCronometroAtivo} />
+      )}
     </S._CardTarefa>
   );
 };

@@ -19,22 +19,41 @@ import type { IColuna, ITarefa } from "../../interfaces/Interfaces";
 export const Container = () => {
   const [colunas, setColunas] = useState<IColuna[]>([]);
   const [colunaParaExcluir, setColunaParaExcluir] = useState<IColuna | null>(
-    null
+    null,
   );
   const [tarefaParaExcluir, setTarefaParaExcluir] = useState<ITarefa | null>(
-    null
+    null,
   );
+  const [cronometro, setCronometro] = useState(false);
+  const [idColunaCronometroAtivo, setIdColunaCronometroAtivo] = useState<
+    string | null
+  >(null);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
       },
-    })
+    }),
   );
 
-  function encontrarColunaPorTarefa(tarefaId: string, colunasAtuais: IColuna[]) {
+  function toggleCronometroColuna(colunaId: string) {
+    setIdColunaCronometroAtivo((colunaAtual) => {
+      if (colunaAtual === colunaId) {
+        setCronometro((cronometroAtual) => !cronometroAtual);
+        return colunaAtual;
+      }
+
+      setCronometro(true);
+      return colunaId;
+    });
+  }
+
+  function encontrarColunaPorTarefa(
+    tarefaId: string,
+    colunasAtuais: IColuna[],
+  ) {
     return colunasAtuais.find((coluna) =>
-      coluna.tarefas.some((tarefa) => tarefa.id === tarefaId)
+      coluna.tarefas.some((tarefa) => tarefa.id === tarefaId),
     );
   }
 
@@ -71,13 +90,13 @@ export const Container = () => {
             },
           ],
         };
-      })
+      }),
     );
   }
 
   function removerColuna(colunaId: string) {
     setColunas((colunasAtuais) =>
-      colunasAtuais.filter((coluna) => coluna.id !== colunaId)
+      colunasAtuais.filter((coluna) => coluna.id !== colunaId),
     );
   }
 
@@ -93,7 +112,7 @@ export const Container = () => {
       colunasAtuais.map((coluna) => ({
         ...coluna,
         tarefas: coluna.tarefas.filter((tarefa) => tarefa.id !== tarefaId),
-      }))
+      })),
     );
   }
 
@@ -109,17 +128,17 @@ export const Container = () => {
       colunasAtuais.map((coluna) => ({
         ...coluna,
         tarefas: coluna.tarefas.map((tarefa) =>
-          tarefa.id === tarefaId ? { ...tarefa, descricao } : tarefa
+          tarefa.id === tarefaId ? { ...tarefa, descricao } : tarefa,
         ),
-      }))
+      })),
     );
   }
 
   function atualizarTituloColuna(colunaId: string, texto: string) {
     setColunas((colunasAtuais) =>
       colunasAtuais.map((coluna) =>
-        coluna.id === colunaId ? { ...coluna, texto } : coluna
-      )
+        coluna.id === colunaId ? { ...coluna, texto } : coluna,
+      ),
     );
   }
 
@@ -137,11 +156,11 @@ export const Container = () => {
     colunasAtuais: IColuna[];
   }) {
     const tarefasOrigem = colunaOrigem.tarefas.filter(
-      (tarefa) => tarefa.id !== tarefaMovida.id
+      (tarefa) => tarefa.id !== tarefaMovida.id,
     );
     const tarefasDestino = [...colunaDestino.tarefas];
     const tarefaDestinoIndex = tarefasDestino.findIndex(
-      (tarefa) => tarefa.id === overId
+      (tarefa) => tarefa.id === overId,
     );
     const novoIndex =
       tarefaDestinoIndex >= 0 ? tarefaDestinoIndex : tarefasDestino.length;
@@ -176,7 +195,7 @@ export const Container = () => {
       if (colunaOrigem.id === colunaDestino.id) return colunasAtuais;
 
       const tarefaMovida = colunaOrigem.tarefas.find(
-        (tarefa) => tarefa.id === activeId
+        (tarefa) => tarefa.id === activeId,
       );
 
       if (!tarefaMovida) return colunasAtuais;
@@ -206,7 +225,7 @@ export const Container = () => {
       if (colunaOrigem.id !== colunaDestino.id) return colunasAtuais;
 
       const oldIndex = colunaOrigem.tarefas.findIndex(
-        (tarefa) => tarefa.id === activeId
+        (tarefa) => tarefa.id === activeId,
       );
       const overColumnId = colunaDestino.id === overId;
       const newIndex = overColumnId
@@ -217,8 +236,11 @@ export const Container = () => {
 
       return colunasAtuais.map((coluna) =>
         coluna.id === colunaOrigem.id
-          ? { ...coluna, tarefas: arrayMove(coluna.tarefas, oldIndex, newIndex) }
-          : coluna
+          ? {
+              ...coluna,
+              tarefas: arrayMove(coluna.tarefas, oldIndex, newIndex),
+            }
+          : coluna,
       );
     });
   }
@@ -235,6 +257,9 @@ export const Container = () => {
           <Coluna
             key={coluna.id}
             coluna={coluna}
+            cronometro={cronometro}
+            colunaComCronometroAtivo={idColunaCronometroAtivo === coluna.id}
+            onToggleCronometro={() => toggleCronometroColuna(coluna.id)}
             onAdicionarTarefa={adicionarTarefa}
             onAtualizarTarefa={atualizarTarefa}
             onAtualizarTitulo={atualizarTituloColuna}

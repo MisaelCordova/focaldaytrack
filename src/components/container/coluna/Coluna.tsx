@@ -1,5 +1,6 @@
 import * as S from "./styles";
 import IconeTimer from "../../../assets/iconeTimer.svg?react";
+import IconeTimerOff from "../../../assets/iconeTimerOff.svg?react";
 import IconeDelete from "../../../assets/iconeDelete.svg?react";
 import { Button } from "../../Button/Button";
 import { useEffect, useRef } from "react";
@@ -11,8 +12,12 @@ import {
 } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import IconeAdd from "../../../assets/iconeAdd.svg?react";
+
 interface IColunaProps {
   coluna: IColuna;
+  cronometro: boolean;
+  colunaComCronometroAtivo: boolean;
+  onToggleCronometro: () => void;
   onAdicionarTarefa: (colunaId: string) => void;
   onAtualizarTarefa: (tarefaId: string, descricao: string) => void;
   onAtualizarTitulo: (colunaId: string, texto: string) => void;
@@ -24,6 +29,9 @@ interface IColunaProps {
 
 export const Coluna = ({
   coluna,
+  cronometro,
+  colunaComCronometroAtivo,
+  onToggleCronometro,
   onAdicionarTarefa,
   onAtualizarTarefa,
   onAtualizarTitulo,
@@ -54,9 +62,6 @@ export const Coluna = ({
     event.currentTarget.blur();
   }
 
-
-
-
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
@@ -71,13 +76,23 @@ export const Coluna = ({
           onBlur={removerColunaSeVazia}
           onKeyDown={handleTituloKeyDown}
         ></S._Titulo>
-        <IconeTimer />
+        <Button
+          onClick={onToggleCronometro}
+          style={{ boxShadow: "none" }}
+          icone={
+            colunaComCronometroAtivo && cronometro ? (
+              <IconeTimer />
+            ) : (
+              <IconeTimerOff />
+            )
+          }
+        />
+
         <Button
           onClick={() => onSolicitarRemocaoColuna(coluna)}
           style={{ boxShadow: "none" }}
           icone={<IconeDelete />}
         />
-       
       </S._HeaderColuna>
       <SortableContext
         items={coluna.tarefas.map((tarefa) => tarefa.id)}
@@ -87,6 +102,8 @@ export const Coluna = ({
           <Tarefa
             key={tarefa.id}
             {...tarefa}
+            cronometro={cronometro}
+            colunaComCronometroAtivo={colunaComCronometroAtivo}
             onAtualizarDescricao={onAtualizarTarefa}
             onRemoverTarefa={onRemoverTarefa}
             onSolicitarRemocaoTarefa={onSolicitarRemocaoTarefa}
@@ -96,7 +113,7 @@ export const Coluna = ({
       <Button
         text="Adicionar tarefa"
         icone={<IconeAdd />}
-        style={{backgroundColor: "#3665e4"}}
+        style={{ backgroundColor: "#3665e4" }}
         onClick={() => onAdicionarTarefa(coluna.id)}
       />
     </S._Coluna>

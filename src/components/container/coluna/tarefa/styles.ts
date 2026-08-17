@@ -2,8 +2,8 @@ import styled from "styled-components";
 
 export const _CardTarefa = styled.div`
     display: flex;
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
+    
     gap: 5px;
     padding: 5px;
     background-color: white;
@@ -23,6 +23,10 @@ export const _CardTarefa = styled.div`
         pointer-events: auto;
     }
 `
+export const _HeaderCard = styled.div`
+    display: flex;
+    align-items: center;
+`;
 export const _Texto = styled.textarea`
     resize: none;
     min-height: 30px;
