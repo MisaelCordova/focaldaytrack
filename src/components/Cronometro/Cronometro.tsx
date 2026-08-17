@@ -2,52 +2,28 @@ import * as S from "./styles";
 import IconePlayArrow from "../../assets/iconePlayArrow.svg?react";
 import IconePauseArrow from "../../assets/iconePauseArrow.svg?react";
 import IconeRefresh from "../../assets/iconeRefresh.svg?react";
-import { useEffect, useRef, useState } from "react";
 import { Button } from "../Button/Button";
+
+interface ICronometroProps {
+  colunaComCronometroAtivo: boolean;
+  msDecorrido: number;
+  rodando: boolean;
+  onToggle: () => void;
+  onReiniciar: () => void;
+}
 
 export const Cronometro = ({
   colunaComCronometroAtivo,
-}: {
-  colunaComCronometroAtivo: boolean;
-}) => {
-  const [rodando, setRodando] = useState<boolean>(false);
-  const [msDecorrido, setMsDecorrido] = useState(0);
-  const horarioInicioRef = useRef<number | null>(null);
-  const msAcumulados = useRef(0);
-
-  useEffect(() => {
-    if (!rodando) return;
-
-    horarioInicioRef.current = Date.now();
-
-    const intervalId = window.setInterval(() => {
-      if (!horarioInicioRef.current) return;
-      const tempoAtualDecorrido =
-        msAcumulados.current + (Date.now() - horarioInicioRef.current);
-      setMsDecorrido(tempoAtualDecorrido);
-    }, 250);
-    return () => {
-      window.clearInterval(intervalId);
-      if (horarioInicioRef.current) {
-        msAcumulados.current += Date.now() - horarioInicioRef.current;
-        horarioInicioRef.current = null;
-      }
-    };
-  }, [rodando]);
-
-  const reiniciar = () => {
-    setRodando(false);
-    setMsDecorrido(0);
-    msAcumulados.current = 0;
-    horarioInicioRef.current = null;
-  };
-
+  msDecorrido,
+  rodando,
+  onToggle,
+  onReiniciar,
+}: ICronometroProps) => {
   const totalSeconds = Math.floor(msDecorrido / 1000);
   const horas = Math.floor(totalSeconds / 3600);
   const minutos = Math.floor((totalSeconds % 3600) / 60);
-
   const segundos = totalSeconds % 60;
-  
+
   return (
     <S._Cronometro>
       {String(horas).padStart(2, "0")}:{String(minutos).padStart(2, "0")}:
@@ -55,23 +31,22 @@ export const Cronometro = ({
       <div>
         {colunaComCronometroAtivo && (
           <>
-            {" "}
             {rodando ? (
               <Button
                 style={{ boxShadow: "none", padding: 0 }}
-                onClick={() => setRodando(false)}
+                onClick={onToggle}
                 icone={<IconePauseArrow />}
               />
             ) : (
               <Button
                 style={{ boxShadow: "none", padding: 0 }}
-                onClick={() => setRodando(true)}
+                onClick={onToggle}
                 icone={<IconePlayArrow />}
               />
             )}
             <Button
               style={{ boxShadow: "none", padding: 0 }}
-              onClick={reiniciar}
+              onClick={onReiniciar}
               icone={<IconeRefresh />}
             />
           </>

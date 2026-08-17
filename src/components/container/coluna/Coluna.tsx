@@ -17,6 +17,10 @@ interface IColunaProps {
   coluna: IColuna;
   cronometro: boolean;
   colunaComCronometroAtivo: boolean;
+  obterMsDecorridoTarefa: (tarefaId: string) => number;
+  obterCronometroTarefa: (tarefaId: string) => { rodando: boolean };
+  onToggleCronometroTarefa: (tarefaId: string) => void;
+  onReiniciarCronometroTarefa: (tarefaId: string) => void;
   onToggleCronometro: () => void;
   onAdicionarTarefa: (colunaId: string) => void;
   onAtualizarTarefa: (tarefaId: string, descricao: string) => void;
@@ -31,6 +35,10 @@ export const Coluna = ({
   coluna,
   cronometro,
   colunaComCronometroAtivo,
+  obterMsDecorridoTarefa,
+  obterCronometroTarefa,
+  onToggleCronometroTarefa,
+  onReiniciarCronometroTarefa,
   onToggleCronometro,
   onAdicionarTarefa,
   onAtualizarTarefa,
@@ -104,6 +112,10 @@ export const Coluna = ({
             {...tarefa}
             cronometro={cronometro}
             colunaComCronometroAtivo={colunaComCronometroAtivo}
+            msDecorrido={obterMsDecorridoTarefa(tarefa.id)}
+            cronometroRodando={obterCronometroTarefa(tarefa.id).rodando}
+            onToggleCronometro={() => onToggleCronometroTarefa(tarefa.id)}
+            onReiniciarCronometro={() => onReiniciarCronometroTarefa(tarefa.id)}
             onAtualizarDescricao={onAtualizarTarefa}
             onRemoverTarefa={onRemoverTarefa}
             onSolicitarRemocaoTarefa={onSolicitarRemocaoTarefa}

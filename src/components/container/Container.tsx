@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   closestCorners,
   DndContext,
@@ -16,6 +16,14 @@ import { ConfirmModal } from "../ConfirmModal/ConfirmModal";
 import * as S from "./styles";
 import type { IColuna, ITarefa } from "../../interfaces/Interfaces";
 
+type CronometroTarefa = {
+  rodando: boolean;
+  iniciadoEm: number | null;
+  msAcumulados: number;
+};
+
+const getTimestamp = () => performance.now();
+
 export const Container = () => {
   const [colunas, setColunas] = useState<IColuna[]>([]);
   const [colunaParaExcluir, setColunaParaExcluir] = useState<IColuna | null>(
@@ -28,6 +36,10 @@ export const Container = () => {
   const [idColunaCronometroAtivo, setIdColunaCronometroAtivo] = useState<
     string | null
   >(null);
+  const [cronometrosPorTarefa, setCronometrosPorTarefa] = useState<
+    Record<string, CronometroTarefa>
+  >({});
+  const [agora, setAgora] = useState(0);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -35,6 +47,20 @@ export const Container = () => {
       },
     }),
   );
+
+  const existeCronometroRodando = Object.values(cronometrosPorTarefa).some(
+    (cronometroTarefa) => cronometroTarefa.rodando,
+  );
+
+  useEffect(() => {
+    if (!existeCronometroRodando) return;
+
+    const intervalId = window.setInterval(() => {
+      setAgora(getTimestamp());
+    }, 250);
+
+    return () => window.clearInterval(intervalId);
+  }, [existeCronometroRodando]);
 
   function toggleCronometroColuna(colunaId: string) {
     setIdColunaCronometroAtivo((colunaAtual) => {
@@ -45,6 +71,86 @@ export const Container = () => {
 
       setCronometro(true);
       return colunaId;
+    });
+  }
+
+  function obterCronometroTarefa(tarefaId: string) {
+    return (
+      cronometrosPorTarefa[tarefaId] ?? {
+        rodando: false,
+        iniciadoEm: null,
+        msAcumulados: 0,
+      }
+    );
+  }
+
+  function obterMsDecorridoTarefa(tarefaId: string) {
+    const cronometroTarefa = obterCronometroTarefa(tarefaId);
+
+    return (
+      cronometroTarefa.msAcumulados +
+      (cronometroTarefa.rodando && cronometroTarefa.iniciadoEm
+        ? agora - cronometroTarefa.iniciadoEm
+        : 0)
+    );
+  }
+
+  function toggleCronometroTarefa(tarefaId: string) {
+    const timestampAtual = getTimestamp();
+
+    setCronometrosPorTarefa((cronometrosAtuais) => {
+      const cronometroAtual =
+        cronometrosAtuais[tarefaId] ??
+        ({
+          rodando: false,
+          iniciadoEm: null,
+          msAcumulados: 0,
+        } satisfies CronometroTarefa);
+
+      if (cronometroAtual.rodando) {
+        return {
+          ...cronometrosAtuais,
+          [tarefaId]: {
+            rodando: false,
+            iniciadoEm: null,
+            msAcumulados:
+              cronometroAtual.msAcumulados +
+              (timestampAtual - (cronometroAtual.iniciadoEm ?? timestampAtual)),
+          },
+        };
+      }
+
+      setAgora(timestampAtual);
+
+      return {
+        ...cronometrosAtuais,
+        [tarefaId]: {
+          ...cronometroAtual,
+          rodando: true,
+          iniciadoEm: timestampAtual,
+        },
+      };
+    });
+  }
+
+  function reiniciarCronometroTarefa(tarefaId: string) {
+    const timestampAtual = getTimestamp();
+
+    setCronometrosPorTarefa((cronometrosAtuais) => {
+      const cronometroAtual = cronometrosAtuais[tarefaId];
+
+      if (!cronometroAtual) return cronometrosAtuais;
+
+      setAgora(timestampAtual);
+
+      return {
+        ...cronometrosAtuais,
+        [tarefaId]: {
+          rodando: cronometroAtual.rodando,
+          iniciadoEm: cronometroAtual.rodando ? timestampAtual : null,
+          msAcumulados: 0,
+        },
+      };
     });
   }
 
@@ -114,6 +220,12 @@ export const Container = () => {
         tarefas: coluna.tarefas.filter((tarefa) => tarefa.id !== tarefaId),
       })),
     );
+    setCronometrosPorTarefa((cronometrosAtuais) => {
+      const cronometrosRestantes = { ...cronometrosAtuais };
+
+      delete cronometrosRestantes[tarefaId];
+      return cronometrosRestantes;
+    });
   }
 
   function confirmarRemocaoTarefa() {
@@ -259,6 +371,10 @@ export const Container = () => {
             coluna={coluna}
             cronometro={cronometro}
             colunaComCronometroAtivo={idColunaCronometroAtivo === coluna.id}
+            obterMsDecorridoTarefa={obterMsDecorridoTarefa}
+            obterCronometroTarefa={obterCronometroTarefa}
+            onToggleCronometroTarefa={toggleCronometroTarefa}
+            onReiniciarCronometroTarefa={reiniciarCronometroTarefa}
             onToggleCronometro={() => toggleCronometroColuna(coluna.id)}
             onAdicionarTarefa={adicionarTarefa}
             onAtualizarTarefa={atualizarTarefa}

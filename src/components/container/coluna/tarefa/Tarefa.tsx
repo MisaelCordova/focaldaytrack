@@ -9,6 +9,10 @@ import { Cronometro } from "../../../Cronometro/Cronometro";
 interface ITarefaProps extends ITarefa {
   cronometro: boolean;
   colunaComCronometroAtivo: boolean;
+  msDecorrido: number;
+  cronometroRodando: boolean;
+  onToggleCronometro: () => void;
+  onReiniciarCronometro: () => void;
   onAtualizarDescricao: (tarefaId: string, descricao: string) => void;
   onRemoverTarefa: (tarefaId: string) => void;
   onSolicitarRemocaoTarefa: (tarefa: ITarefa) => void;
@@ -19,6 +23,10 @@ export const Tarefa = ({
   descricao,
   cronometro,
   colunaComCronometroAtivo,
+  msDecorrido,
+  cronometroRodando,
+  onToggleCronometro,
+  onReiniciarCronometro,
   onAtualizarDescricao,
   onRemoverTarefa,
   onSolicitarRemocaoTarefa,
@@ -109,7 +117,13 @@ export const Tarefa = ({
         </S._DeleteButton>
       </S._HeaderCard>
       {cronometro && (
-        <Cronometro colunaComCronometroAtivo={colunaComCronometroAtivo} />
+        <Cronometro
+          colunaComCronometroAtivo={colunaComCronometroAtivo}
+          msDecorrido={msDecorrido}
+          rodando={cronometroRodando}
+          onToggle={onToggleCronometro}
+          onReiniciar={onReiniciarCronometro}
+        />
       )}
     </S._CardTarefa>
   );
