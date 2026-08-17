@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   closestCorners,
   DndContext,
@@ -16,25 +16,201 @@ import { ConfirmModal } from "../ConfirmModal/ConfirmModal";
 import * as S from "./styles";
 import type { IColuna, ITarefa } from "../../interfaces/Interfaces";
 
+type CronometroTarefa = {
+  rodando: boolean;
+  iniciadoEm: number | null;
+  msAcumulados: number;
+};
+
+const getTimestamp = () => performance.now();
+
 export const Container = () => {
   const [colunas, setColunas] = useState<IColuna[]>([]);
   const [colunaParaExcluir, setColunaParaExcluir] = useState<IColuna | null>(
-    null
+    null,
   );
   const [tarefaParaExcluir, setTarefaParaExcluir] = useState<ITarefa | null>(
-    null
+    null,
   );
+  const [cronometro, setCronometro] = useState(false);
+  const [idColunaCronometroAtivo, setIdColunaCronometroAtivo] = useState<
+    string | null
+  >(null);
+  const [cronometrosPorTarefa, setCronometrosPorTarefa] = useState<
+    Record<string, CronometroTarefa>
+  >({});
+  const [agora, setAgora] = useState(0);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
       },
-    })
+    }),
   );
 
-  function encontrarColunaPorTarefa(tarefaId: string, colunasAtuais: IColuna[]) {
+  const existeCronometroRodando = Object.values(cronometrosPorTarefa).some(
+    (cronometroTarefa) => cronometroTarefa.rodando,
+  );
+
+  useEffect(() => {
+    if (!existeCronometroRodando) return;
+
+    const intervalId = window.setInterval(() => {
+      setAgora(getTimestamp());
+    }, 250);
+
+    return () => window.clearInterval(intervalId);
+  }, [existeCronometroRodando]);
+
+  function toggleCronometroColuna(colunaId: string) {
+    setIdColunaCronometroAtivo((colunaAtual) => {
+      if (colunaAtual === colunaId) {
+        setCronometro((cronometroAtual) => !cronometroAtual);
+        return colunaAtual;
+      }
+
+      setCronometro(true);
+      return colunaId;
+    });
+  }
+
+  function obterCronometroTarefa(tarefaId: string) {
+    return (
+      cronometrosPorTarefa[tarefaId] ?? {
+        rodando: false,
+        iniciadoEm: null,
+        msAcumulados: 0,
+      }
+    );
+  }
+
+  function tarefaTemCronometroRegistrado(tarefaId: string) {
+    return tarefaId in cronometrosPorTarefa;
+  }
+
+  function obterMsDecorridoTarefa(tarefaId: string) {
+    const cronometroTarefa = obterCronometroTarefa(tarefaId);
+
+    return (
+      cronometroTarefa.msAcumulados +
+      (cronometroTarefa.rodando && cronometroTarefa.iniciadoEm
+        ? agora - cronometroTarefa.iniciadoEm
+        : 0)
+    );
+  }
+
+  function toggleCronometroTarefa(tarefaId: string) {
+    const timestampAtual = getTimestamp();
+
+    setCronometrosPorTarefa((cronometrosAtuais) => {
+      const cronometroAtual =
+        cronometrosAtuais[tarefaId] ??
+        ({
+          rodando: false,
+          iniciadoEm: null,
+          msAcumulados: 0,
+        } satisfies CronometroTarefa);
+
+      if (cronometroAtual.rodando) {
+        return {
+          ...cronometrosAtuais,
+          [tarefaId]: {
+            rodando: false,
+            iniciadoEm: null,
+            msAcumulados:
+              cronometroAtual.msAcumulados +
+              (timestampAtual - (cronometroAtual.iniciadoEm ?? timestampAtual)),
+          },
+        };
+      }
+
+      setAgora(timestampAtual);
+
+      return {
+        ...cronometrosAtuais,
+        [tarefaId]: {
+          ...cronometroAtual,
+          rodando: true,
+          iniciadoEm: timestampAtual,
+        },
+      };
+    });
+  }
+
+  function reiniciarCronometroTarefa(tarefaId: string) {
+    const timestampAtual = getTimestamp();
+
+    setCronometrosPorTarefa((cronometrosAtuais) => {
+      const cronometroAtual = cronometrosAtuais[tarefaId];
+
+      if (!cronometroAtual) return cronometrosAtuais;
+
+      setAgora(timestampAtual);
+
+      return {
+        ...cronometrosAtuais,
+        [tarefaId]: {
+          rodando: cronometroAtual.rodando,
+          iniciadoEm: cronometroAtual.rodando ? timestampAtual : null,
+          msAcumulados: 0,
+        },
+      };
+    });
+  }
+
+  function sincronizarCronometroTarefaComColuna(
+    tarefaId: string,
+    colunaDestinoId: string,
+  ) {
+    const timestampAtual = getTimestamp();
+    const colunaDestinoTemCronometroAtivo =
+      cronometro && idColunaCronometroAtivo === colunaDestinoId;
+
+    setCronometrosPorTarefa((cronometrosAtuais) => {
+      const cronometroAtual =
+        cronometrosAtuais[tarefaId] ??
+        ({
+          rodando: false,
+          iniciadoEm: null,
+          msAcumulados: 0,
+        } satisfies CronometroTarefa);
+
+      if (colunaDestinoTemCronometroAtivo) {
+        if (cronometroAtual.rodando) return cronometrosAtuais;
+
+        setAgora(timestampAtual);
+
+        return {
+          ...cronometrosAtuais,
+          [tarefaId]: {
+            ...cronometroAtual,
+            rodando: true,
+            iniciadoEm: timestampAtual,
+          },
+        };
+      }
+
+      if (!cronometroAtual.rodando) return cronometrosAtuais;
+
+      return {
+        ...cronometrosAtuais,
+        [tarefaId]: {
+          rodando: false,
+          iniciadoEm: null,
+          msAcumulados:
+            cronometroAtual.msAcumulados +
+            (timestampAtual - (cronometroAtual.iniciadoEm ?? timestampAtual)),
+        },
+      };
+    });
+  }
+
+  function encontrarColunaPorTarefa(
+    tarefaId: string,
+    colunasAtuais: IColuna[],
+  ) {
     return colunasAtuais.find((coluna) =>
-      coluna.tarefas.some((tarefa) => tarefa.id === tarefaId)
+      coluna.tarefas.some((tarefa) => tarefa.id === tarefaId),
     );
   }
 
@@ -71,13 +247,13 @@ export const Container = () => {
             },
           ],
         };
-      })
+      }),
     );
   }
 
   function removerColuna(colunaId: string) {
     setColunas((colunasAtuais) =>
-      colunasAtuais.filter((coluna) => coluna.id !== colunaId)
+      colunasAtuais.filter((coluna) => coluna.id !== colunaId),
     );
   }
 
@@ -93,8 +269,14 @@ export const Container = () => {
       colunasAtuais.map((coluna) => ({
         ...coluna,
         tarefas: coluna.tarefas.filter((tarefa) => tarefa.id !== tarefaId),
-      }))
+      })),
     );
+    setCronometrosPorTarefa((cronometrosAtuais) => {
+      const cronometrosRestantes = { ...cronometrosAtuais };
+
+      delete cronometrosRestantes[tarefaId];
+      return cronometrosRestantes;
+    });
   }
 
   function confirmarRemocaoTarefa() {
@@ -109,17 +291,17 @@ export const Container = () => {
       colunasAtuais.map((coluna) => ({
         ...coluna,
         tarefas: coluna.tarefas.map((tarefa) =>
-          tarefa.id === tarefaId ? { ...tarefa, descricao } : tarefa
+          tarefa.id === tarefaId ? { ...tarefa, descricao } : tarefa,
         ),
-      }))
+      })),
     );
   }
 
   function atualizarTituloColuna(colunaId: string, texto: string) {
     setColunas((colunasAtuais) =>
       colunasAtuais.map((coluna) =>
-        coluna.id === colunaId ? { ...coluna, texto } : coluna
-      )
+        coluna.id === colunaId ? { ...coluna, texto } : coluna,
+      ),
     );
   }
 
@@ -137,11 +319,11 @@ export const Container = () => {
     colunasAtuais: IColuna[];
   }) {
     const tarefasOrigem = colunaOrigem.tarefas.filter(
-      (tarefa) => tarefa.id !== tarefaMovida.id
+      (tarefa) => tarefa.id !== tarefaMovida.id,
     );
     const tarefasDestino = [...colunaDestino.tarefas];
     const tarefaDestinoIndex = tarefasDestino.findIndex(
-      (tarefa) => tarefa.id === overId
+      (tarefa) => tarefa.id === overId,
     );
     const novoIndex =
       tarefaDestinoIndex >= 0 ? tarefaDestinoIndex : tarefasDestino.length;
@@ -176,10 +358,15 @@ export const Container = () => {
       if (colunaOrigem.id === colunaDestino.id) return colunasAtuais;
 
       const tarefaMovida = colunaOrigem.tarefas.find(
-        (tarefa) => tarefa.id === activeId
+        (tarefa) => tarefa.id === activeId,
       );
 
       if (!tarefaMovida) return colunasAtuais;
+
+      sincronizarCronometroTarefaComColuna(
+        tarefaMovida.id,
+        colunaDestino.id,
+      );
 
       return moverTarefaEntreColunas({
         tarefaMovida,
@@ -206,7 +393,7 @@ export const Container = () => {
       if (colunaOrigem.id !== colunaDestino.id) return colunasAtuais;
 
       const oldIndex = colunaOrigem.tarefas.findIndex(
-        (tarefa) => tarefa.id === activeId
+        (tarefa) => tarefa.id === activeId,
       );
       const overColumnId = colunaDestino.id === overId;
       const newIndex = overColumnId
@@ -217,8 +404,11 @@ export const Container = () => {
 
       return colunasAtuais.map((coluna) =>
         coluna.id === colunaOrigem.id
-          ? { ...coluna, tarefas: arrayMove(coluna.tarefas, oldIndex, newIndex) }
-          : coluna
+          ? {
+              ...coluna,
+              tarefas: arrayMove(coluna.tarefas, oldIndex, newIndex),
+            }
+          : coluna,
       );
     });
   }
@@ -235,6 +425,14 @@ export const Container = () => {
           <Coluna
             key={coluna.id}
             coluna={coluna}
+            cronometro={cronometro}
+            colunaComCronometroAtivo={idColunaCronometroAtivo === coluna.id}
+            obterMsDecorridoTarefa={obterMsDecorridoTarefa}
+            obterCronometroTarefa={obterCronometroTarefa}
+            tarefaTemCronometroRegistrado={tarefaTemCronometroRegistrado}
+            onToggleCronometroTarefa={toggleCronometroTarefa}
+            onReiniciarCronometroTarefa={reiniciarCronometroTarefa}
+            onToggleCronometro={() => toggleCronometroColuna(coluna.id)}
             onAdicionarTarefa={adicionarTarefa}
             onAtualizarTarefa={atualizarTarefa}
             onAtualizarTitulo={atualizarTituloColuna}
