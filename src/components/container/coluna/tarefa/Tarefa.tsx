@@ -7,7 +7,7 @@ import IconeDelete from "../../../../assets/iconeDelete.svg?react";
 import { Cronometro } from "../../../Cronometro/Cronometro";
 
 interface ITarefaProps extends ITarefa {
-  cronometro: boolean;
+  exibirCronometro: boolean;
   colunaComCronometroAtivo: boolean;
   msDecorrido: number;
   cronometroRodando: boolean;
@@ -21,7 +21,7 @@ interface ITarefaProps extends ITarefa {
 export const Tarefa = ({
   id,
   descricao,
-  cronometro,
+  exibirCronometro,
   colunaComCronometroAtivo,
   msDecorrido,
   cronometroRodando,
@@ -116,7 +116,7 @@ export const Tarefa = ({
           <IconeDelete />
         </S._DeleteButton>
       </S._HeaderCard>
-      {cronometro && (
+      {exibirCronometro && (
         <Cronometro
           colunaComCronometroAtivo={colunaComCronometroAtivo}
           msDecorrido={msDecorrido}

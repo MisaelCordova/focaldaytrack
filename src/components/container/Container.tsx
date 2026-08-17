@@ -84,6 +84,10 @@ export const Container = () => {
     );
   }
 
+  function tarefaTemCronometroRegistrado(tarefaId: string) {
+    return tarefaId in cronometrosPorTarefa;
+  }
+
   function obterMsDecorridoTarefa(tarefaId: string) {
     const cronometroTarefa = obterCronometroTarefa(tarefaId);
 
@@ -149,6 +153,53 @@ export const Container = () => {
           rodando: cronometroAtual.rodando,
           iniciadoEm: cronometroAtual.rodando ? timestampAtual : null,
           msAcumulados: 0,
+        },
+      };
+    });
+  }
+
+  function sincronizarCronometroTarefaComColuna(
+    tarefaId: string,
+    colunaDestinoId: string,
+  ) {
+    const timestampAtual = getTimestamp();
+    const colunaDestinoTemCronometroAtivo =
+      cronometro && idColunaCronometroAtivo === colunaDestinoId;
+
+    setCronometrosPorTarefa((cronometrosAtuais) => {
+      const cronometroAtual =
+        cronometrosAtuais[tarefaId] ??
+        ({
+          rodando: false,
+          iniciadoEm: null,
+          msAcumulados: 0,
+        } satisfies CronometroTarefa);
+
+      if (colunaDestinoTemCronometroAtivo) {
+        if (cronometroAtual.rodando) return cronometrosAtuais;
+
+        setAgora(timestampAtual);
+
+        return {
+          ...cronometrosAtuais,
+          [tarefaId]: {
+            ...cronometroAtual,
+            rodando: true,
+            iniciadoEm: timestampAtual,
+          },
+        };
+      }
+
+      if (!cronometroAtual.rodando) return cronometrosAtuais;
+
+      return {
+        ...cronometrosAtuais,
+        [tarefaId]: {
+          rodando: false,
+          iniciadoEm: null,
+          msAcumulados:
+            cronometroAtual.msAcumulados +
+            (timestampAtual - (cronometroAtual.iniciadoEm ?? timestampAtual)),
         },
       };
     });
@@ -312,6 +363,11 @@ export const Container = () => {
 
       if (!tarefaMovida) return colunasAtuais;
 
+      sincronizarCronometroTarefaComColuna(
+        tarefaMovida.id,
+        colunaDestino.id,
+      );
+
       return moverTarefaEntreColunas({
         tarefaMovida,
         colunaOrigem,
@@ -373,6 +429,7 @@ export const Container = () => {
             colunaComCronometroAtivo={idColunaCronometroAtivo === coluna.id}
             obterMsDecorridoTarefa={obterMsDecorridoTarefa}
             obterCronometroTarefa={obterCronometroTarefa}
+            tarefaTemCronometroRegistrado={tarefaTemCronometroRegistrado}
             onToggleCronometroTarefa={toggleCronometroTarefa}
             onReiniciarCronometroTarefa={reiniciarCronometroTarefa}
             onToggleCronometro={() => toggleCronometroColuna(coluna.id)}
