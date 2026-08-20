@@ -9,7 +9,7 @@ export const _Totalizador = styled.div`
     color: #858b96;
     background-color: aliceblue;
 
-    &span:{
-
+    span {
+        font-weight: bold;
     }
 `

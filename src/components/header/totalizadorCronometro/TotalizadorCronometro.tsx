@@ -23,7 +23,7 @@ export const TotalizadorCronometro = ({
   return (
     <S._Totalizador>
       <IconeSchedule />
-      Tempo total cronometrado: {formatarTempo(msTotal)}
+      Tempo total cronometrado: <span>{formatarTempo(msTotal)}</span>
     </S._Totalizador>
   );
 };
