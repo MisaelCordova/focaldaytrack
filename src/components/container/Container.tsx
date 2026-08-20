@@ -19,7 +19,12 @@ import type { IColuna, ITarefa } from "../../interfaces/Interfaces";
 type CronometroTarefa = {
   rodando: boolean;
   iniciadoEm: number | null;
-  msAcumulados: number;
+  intervalos: IntervaloCronometro[];
+};
+
+type IntervaloCronometro = {
+  inicio: number;
+  fim: number;
 };
 
 const COLUNAS_STORAGE_KEY = "@FocalDayTrack:colunas";
@@ -60,7 +65,64 @@ function carregarColunasSalvas() {
   }
 }
 
-export const Container = () => {
+function criarCronometroTarefa(): CronometroTarefa {
+  return {
+    rodando: false,
+    iniciadoEm: null,
+    intervalos: [],
+  };
+}
+
+function calcularDuracaoIntervalos(intervalos: IntervaloCronometro[]) {
+  return intervalos.reduce(
+    (total, intervalo) => total + (intervalo.fim - intervalo.inicio),
+    0,
+  );
+}
+
+function unirIntervalosSobrepostos(intervalos: IntervaloCronometro[]) {
+  const intervalosOrdenados = [...intervalos].sort(
+    (intervaloA, intervaloB) => intervaloA.inicio - intervaloB.inicio,
+  );
+
+  return intervalosOrdenados.reduce<IntervaloCronometro[]>(
+    (intervalosUnidos, intervaloAtual) => {
+      const ultimoIntervalo = intervalosUnidos.at(-1);
+
+      if (!ultimoIntervalo || intervaloAtual.inicio > ultimoIntervalo.fim) {
+        intervalosUnidos.push({ ...intervaloAtual });
+        return intervalosUnidos;
+      }
+
+      ultimoIntervalo.fim = Math.max(ultimoIntervalo.fim, intervaloAtual.fim);
+      return intervalosUnidos;
+    },
+    [],
+  );
+}
+
+function obterIntervalosComRodando(
+  cronometroTarefa: CronometroTarefa,
+  timestampAtual: number,
+) {
+  if (!cronometroTarefa.rodando || !cronometroTarefa.iniciadoEm) {
+    return cronometroTarefa.intervalos;
+  }
+
+  return [
+    ...cronometroTarefa.intervalos,
+    {
+      inicio: cronometroTarefa.iniciadoEm,
+      fim: timestampAtual,
+    },
+  ];
+}
+
+interface IContainerProps {
+  onAtualizarTotalCronometrado: (msTotal: number) => void;
+}
+
+export const Container = ({ onAtualizarTotalCronometrado }: IContainerProps) => {
   const [colunas, setColunas] = useState<IColuna[]>(carregarColunasSalvas);
   const [colunaParaExcluir, setColunaParaExcluir] = useState<IColuna | null>(
     null,
@@ -87,10 +149,21 @@ export const Container = () => {
   const existeCronometroRodando = Object.values(cronometrosPorTarefa).some(
     (cronometroTarefa) => cronometroTarefa.rodando,
   );
+  const totalCronometrado = calcularDuracaoIntervalos(
+    unirIntervalosSobrepostos(
+      Object.values(cronometrosPorTarefa).flatMap((cronometroTarefa) =>
+        obterIntervalosComRodando(cronometroTarefa, agora),
+      ),
+    ),
+  );
 
   useEffect(() => {
     localStorage.setItem(COLUNAS_STORAGE_KEY, JSON.stringify(colunas));
   }, [colunas]);
+
+  useEffect(() => {
+    onAtualizarTotalCronometrado(totalCronometrado);
+  }, [onAtualizarTotalCronometrado, totalCronometrado]);
 
   useEffect(() => {
     if (!existeCronometroRodando) return;
@@ -113,13 +186,7 @@ export const Container = () => {
   }
 
   function obterCronometroTarefa(tarefaId: string) {
-    return (
-      cronometrosPorTarefa[tarefaId] ?? {
-        rodando: false,
-        iniciadoEm: null,
-        msAcumulados: 0,
-      }
-    );
+    return cronometrosPorTarefa[tarefaId] ?? criarCronometroTarefa();
   }
 
   function tarefaTemCronometroRegistrado(tarefaId: string) {
@@ -129,11 +196,8 @@ export const Container = () => {
   function obterMsDecorridoTarefa(tarefaId: string) {
     const cronometroTarefa = obterCronometroTarefa(tarefaId);
 
-    return (
-      cronometroTarefa.msAcumulados +
-      (cronometroTarefa.rodando && cronometroTarefa.iniciadoEm
-        ? agora - cronometroTarefa.iniciadoEm
-        : 0)
+    return calcularDuracaoIntervalos(
+      obterIntervalosComRodando(cronometroTarefa, agora),
     );
   }
 
@@ -142,12 +206,7 @@ export const Container = () => {
 
     setCronometrosPorTarefa((cronometrosAtuais) => {
       const cronometroAtual =
-        cronometrosAtuais[tarefaId] ??
-        ({
-          rodando: false,
-          iniciadoEm: null,
-          msAcumulados: 0,
-        } satisfies CronometroTarefa);
+        cronometrosAtuais[tarefaId] ?? criarCronometroTarefa();
 
       if (cronometroAtual.rodando) {
         return {
@@ -155,9 +214,13 @@ export const Container = () => {
           [tarefaId]: {
             rodando: false,
             iniciadoEm: null,
-            msAcumulados:
-              cronometroAtual.msAcumulados +
-              (timestampAtual - (cronometroAtual.iniciadoEm ?? timestampAtual)),
+            intervalos: [
+              ...cronometroAtual.intervalos,
+              {
+                inicio: cronometroAtual.iniciadoEm ?? timestampAtual,
+                fim: timestampAtual,
+              },
+            ],
           },
         };
       }
@@ -190,7 +253,7 @@ export const Container = () => {
         [tarefaId]: {
           rodando: cronometroAtual.rodando,
           iniciadoEm: cronometroAtual.rodando ? timestampAtual : null,
-          msAcumulados: 0,
+          intervalos: [],
         },
       };
     });
@@ -206,12 +269,7 @@ export const Container = () => {
 
     setCronometrosPorTarefa((cronometrosAtuais) => {
       const cronometroAtual =
-        cronometrosAtuais[tarefaId] ??
-        ({
-          rodando: false,
-          iniciadoEm: null,
-          msAcumulados: 0,
-        } satisfies CronometroTarefa);
+        cronometrosAtuais[tarefaId] ?? criarCronometroTarefa();
 
       if (colunaDestinoTemCronometroAtivo) {
         if (cronometroAtual.rodando) return cronometrosAtuais;
@@ -235,9 +293,13 @@ export const Container = () => {
         [tarefaId]: {
           rodando: false,
           iniciadoEm: null,
-          msAcumulados:
-            cronometroAtual.msAcumulados +
-            (timestampAtual - (cronometroAtual.iniciadoEm ?? timestampAtual)),
+          intervalos: [
+            ...cronometroAtual.intervalos,
+            {
+              inicio: cronometroAtual.iniciadoEm ?? timestampAtual,
+              fim: timestampAtual,
+            },
+          ],
         },
       };
     });
@@ -301,7 +363,7 @@ export const Container = () => {
         [novaTarefaId]: {
           rodando: true,
           iniciadoEm: timestampAtual,
-          msAcumulados: 0,
+          intervalos: [],
         },
       }));
     }
