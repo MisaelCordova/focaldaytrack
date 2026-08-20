@@ -28,7 +28,8 @@ type IntervaloCronometro = {
 };
 
 const COLUNAS_STORAGE_KEY = "@FocalDayTrack:colunas";
-const getTimestamp = () => performance.now();
+const CRONOMETROS_STORAGE_KEY = "@FocalDayTrack:cronometrosPorTarefa";
+const getTimestamp = () => Date.now();
 
 function isTarefa(valor: unknown): valor is ITarefa {
   if (!valor || typeof valor !== "object") return false;
@@ -62,6 +63,55 @@ function carregarColunasSalvas() {
     return Array.isArray(colunas) && colunas.every(isColuna) ? colunas : [];
   } catch {
     return [];
+  }
+}
+
+function isIntervaloCronometro(
+  valor: unknown,
+): valor is IntervaloCronometro {
+  if (!valor || typeof valor !== "object") return false;
+
+  const intervalo = valor as IntervaloCronometro;
+
+  return typeof intervalo.inicio === "number" && typeof intervalo.fim === "number";
+}
+
+function isCronometroTarefa(valor: unknown): valor is CronometroTarefa {
+  if (!valor || typeof valor !== "object") return false;
+
+  const cronometroTarefa = valor as CronometroTarefa;
+
+  return (
+    typeof cronometroTarefa.rodando === "boolean" &&
+    (typeof cronometroTarefa.iniciadoEm === "number" ||
+      cronometroTarefa.iniciadoEm === null) &&
+    Array.isArray(cronometroTarefa.intervalos) &&
+    cronometroTarefa.intervalos.every(isIntervaloCronometro)
+  );
+}
+
+function carregarCronometrosSalvos() {
+  const cronometrosSalvos = localStorage.getItem(CRONOMETROS_STORAGE_KEY);
+
+  if (!cronometrosSalvos) return {};
+
+  try {
+    const cronometros = JSON.parse(cronometrosSalvos);
+
+    if (!cronometros || typeof cronometros !== "object") return {};
+
+    return Object.entries(cronometros).reduce<Record<string, CronometroTarefa>>(
+      (cronometrosValidos, [tarefaId, cronometroTarefa]) => {
+        if (isCronometroTarefa(cronometroTarefa)) {
+          cronometrosValidos[tarefaId] = cronometroTarefa;
+        }
+
+        return cronometrosValidos;
+      },
+      {},
+    );
+  } catch {
+    return {};
   }
 }
 
@@ -136,7 +186,7 @@ export const Container = ({ onAtualizarTotalCronometrado }: IContainerProps) => 
   >(null);
   const [cronometrosPorTarefa, setCronometrosPorTarefa] = useState<
     Record<string, CronometroTarefa>
-  >({});
+  >(carregarCronometrosSalvos);
   const [agora, setAgora] = useState(0);
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -160,6 +210,13 @@ export const Container = ({ onAtualizarTotalCronometrado }: IContainerProps) => 
   useEffect(() => {
     localStorage.setItem(COLUNAS_STORAGE_KEY, JSON.stringify(colunas));
   }, [colunas]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      CRONOMETROS_STORAGE_KEY,
+      JSON.stringify(cronometrosPorTarefa),
+    );
+  }, [cronometrosPorTarefa]);
 
   useEffect(() => {
     onAtualizarTotalCronometrado(totalCronometrado);

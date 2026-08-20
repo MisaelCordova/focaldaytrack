@@ -112,7 +112,7 @@ export const Coluna = ({
           <Tarefa
             key={tarefa.id}
             {...tarefa}
-            exibirCronometro={cronometro && tarefaTemCronometroRegistrado(tarefa.id)}
+            exibirCronometro={tarefaTemCronometroRegistrado(tarefa.id)}
             colunaComCronometroAtivo={colunaComCronometroAtivo}
             msDecorrido={obterMsDecorridoTarefa(tarefa.id)}
             cronometroRodando={obterCronometroTarefa(tarefa.id).rodando}
