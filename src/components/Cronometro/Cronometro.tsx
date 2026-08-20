@@ -2,7 +2,7 @@ import * as S from "./styles";
 import IconePlayArrow from "../../assets/iconePlayArrow.svg?react";
 import IconePauseArrow from "../../assets/iconePauseArrow.svg?react";
 import IconeRefresh from "../../assets/iconeRefresh.svg?react";
-import { Button } from "../Button/Button";
+import { Button } from "../button/Button";
 
 interface ICronometroProps {
   colunaComCronometroAtivo: boolean;

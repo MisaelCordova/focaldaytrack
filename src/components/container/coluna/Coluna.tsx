@@ -2,7 +2,7 @@ import * as S from "./styles";
 import IconeTimer from "../../../assets/iconeTimer.svg?react";
 import IconeTimerOff from "../../../assets/iconeTimerOff.svg?react";
 import IconeDelete from "../../../assets/iconeDelete.svg?react";
-import { Button } from "../../Button/Button";
+import { Button } from "../../button/Button";
 import { useEffect, useRef } from "react";
 import { Tarefa } from "./tarefa/Tarefa";
 import type { IColuna, ITarefa } from "../../../interfaces/Interfaces";

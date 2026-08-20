@@ -4,7 +4,7 @@ import type { ITarefa } from "../../../../interfaces/Interfaces";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import IconeDelete from "../../../../assets/iconeDelete.svg?react";
-import { Cronometro } from "../../../Cronometro/Cronometro";
+import { Cronometro } from "../../../cronometro/Cronometro";
 
 interface ITarefaProps extends ITarefa {
   exibirCronometro: boolean;

@@ -9,10 +9,10 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { Button } from "../Button/Button";
+import { Button } from "../button/Button";
 import { Coluna } from "./coluna/Coluna";
 import IconeAdd from "../../assets/iconeAdd.svg?react";
-import { ConfirmModal } from "../ConfirmModal/ConfirmModal";
+import { ConfirmModal } from "../confirmModal/ConfirmModal";
 import * as S from "./styles";
 import type { IColuna, ITarefa } from "../../interfaces/Interfaces";
 
