@@ -103,15 +103,13 @@ export const Container = () => {
   }, [existeCronometroRodando]);
 
   function toggleCronometroColuna(colunaId: string) {
-    setIdColunaCronometroAtivo((colunaAtual) => {
-      if (colunaAtual === colunaId) {
-        setCronometro((cronometroAtual) => !cronometroAtual);
-        return colunaAtual;
-      }
+    if (idColunaCronometroAtivo === colunaId) {
+      setCronometro((cronometroAtual) => !cronometroAtual);
+      return;
+    }
 
-      setCronometro(true);
-      return colunaId;
-    });
+    setIdColunaCronometroAtivo(colunaId);
+    setCronometro(true);
   }
 
   function obterCronometroTarefa(tarefaId: string) {
