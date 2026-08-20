@@ -273,6 +273,10 @@ export const Container = () => {
   }
 
   function adicionarTarefa(colunaId: string) {
+    const novaTarefaId = crypto.randomUUID();
+    const colunaTemCronometroAtivo =
+      cronometro && idColunaCronometroAtivo === colunaId;
+
     setColunas((colunasAtuais) =>
       colunasAtuais.map((coluna) => {
         if (coluna.id !== colunaId) return coluna;
@@ -282,13 +286,27 @@ export const Container = () => {
           tarefas: [
             ...coluna.tarefas,
             {
-              id: crypto.randomUUID(),
+              id: novaTarefaId,
               descricao: "",
             },
           ],
         };
       }),
     );
+
+    if (colunaTemCronometroAtivo) {
+      const timestampAtual = getTimestamp();
+
+      setAgora(timestampAtual);
+      setCronometrosPorTarefa((cronometrosAtuais) => ({
+        ...cronometrosAtuais,
+        [novaTarefaId]: {
+          rodando: true,
+          iniciadoEm: timestampAtual,
+          msAcumulados: 0,
+        },
+      }));
+    }
   }
 
   function removerColuna(colunaId: string) {
