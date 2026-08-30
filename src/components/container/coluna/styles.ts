@@ -18,7 +18,7 @@ export const _MenuButton = styled.button`
     border: 0;
     border-radius: 8px;
     background-color: transparent;
-    color: #64748b;
+    color: ${({ theme }) => theme.colors.textMuted};
     cursor: grab;
     touch-action: none;
 
@@ -30,14 +30,14 @@ export const _MenuButton = styled.button`
 export const _Coluna = styled.div`
     display : flex;
     flex-direction: column;
-    background-color: #f6fafd;
+    background-color: ${({ theme }) => theme.colors.surfaceMuted};
     min-width: 280px;
     width: 280px;
     flex-shrink: 0;
     padding: 10px;
     gap: 10px;
     border-radius: 10px;
-    border: 2px dashed #8da9f0;
+    border: 2px dashed ${({ theme }) => theme.colors.borderAccent};
     align-self: flex-start;
 
     &[data-dragging="true"] {
@@ -47,6 +47,7 @@ export const _Coluna = styled.div`
 `
 export const _Titulo = styled.textarea`
     background-color: transparent;
+    color: ${({ theme }) => theme.colors.textPrimary};
     text-transform: uppercase;
     width: 100%;
     min-height: 36px;
@@ -63,6 +64,6 @@ export const _Titulo = styled.textarea`
     
     &:focus {
         outline:none;
-        border: 1px solid #e2e8f0;
+        border: 1px solid ${({ theme }) => theme.colors.border};
     }
 `

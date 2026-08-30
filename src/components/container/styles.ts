@@ -3,7 +3,7 @@ import styled from "styled-components";
 export const _Container = styled.main`
     display: flex;
     flex-direction: row;
-    background-color: aliceblue;
+    background-color: ${({ theme }) => theme.colors.boardBackground};
     padding: 20px;
     gap: 10px;
 

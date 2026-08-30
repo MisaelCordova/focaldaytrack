@@ -6,10 +6,11 @@ export const _CardTarefa = styled.div`
     
     gap: 5px;
     padding: 5px;
-    background-color: white;
+    background-color: ${({ theme }) => theme.colors.surface};
     border-radius: 10px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0px 0px 2px 1px  #e2e8f0;
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    box-shadow: 0px 0px 2px 1px ${({ theme }) => theme.colors.shadow};
+    color: ${({ theme }) => theme.colors.textPrimary};
     max-height: fit-content;
     touch-action: none;
 
@@ -36,6 +37,9 @@ export const _Texto = styled.textarea`
     overflow: hidden;
     border: none;
     border-radius: 10px;
+    color: ${({ theme }) => theme.colors.textPrimary};
+    background-color: transparent;
+
     &:focus {
         outline:none;
         
@@ -50,14 +54,14 @@ export const _DeleteButton = styled.button`
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    color: #ef4444;
+    color: ${({ theme }) => theme.colors.dangerText};
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease, background-color 0.2s ease;
 
     &:hover,
     &:focus-visible {
-        background-color: #e2f0fe;
+        background-color: ${({ theme }) => theme.colors.surfaceMuted};
         opacity: 1;
         pointer-events: auto;
     }

@@ -3,9 +3,15 @@ import { TotalizadorCronometro } from "./totalizadorCronometro/TotalizadorCronom
 
 interface IHeaderProps {
   totalCronometrado: number;
+  temaEscuro: boolean;
+  onToggleTema: () => void;
 }
 
-export const Header = ({ totalCronometrado }: IHeaderProps) => {
+export const Header = ({
+  totalCronometrado,
+  temaEscuro,
+  onToggleTema,
+}: IHeaderProps) => {
   const data = new Date().toLocaleDateString("pt-BR", {
     weekday: "long",
     day: "numeric",
@@ -29,7 +35,21 @@ export const Header = ({ totalCronometrado }: IHeaderProps) => {
           é para você
         </p>
       </S._TextoHeader>
-      <TotalizadorCronometro msTotal={totalCronometrado} />
+      <S._HeaderActions>
+        <S._ThemeControl>
+          <S._ThemeLabel>Dark theme</S._ThemeLabel>
+          <S._ThemeToggle
+            type="button"
+            aria-label={temaEscuro ? "Ativar tema claro" : "Ativar tema escuro"}
+            aria-pressed={temaEscuro}
+            onClick={onToggleTema}
+            $ativo={temaEscuro}
+          >
+            <S._ThemeToggleThumb />
+          </S._ThemeToggle>
+        </S._ThemeControl>
+        <TotalizadorCronometro msTotal={totalCronometrado} />
+      </S._HeaderActions>
     </S._Header>
   );
 };

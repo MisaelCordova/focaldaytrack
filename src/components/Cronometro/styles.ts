@@ -5,7 +5,8 @@ export const _Cronometro = styled.div`
     display: flex;
     flex-direction: row;
     gap: 10px;
-    background-color: aliceblue;
+    background-color: ${({ theme }) => theme.colors.boardBackground};
+    color: ${({ theme }) => theme.colors.textPrimary};
     justify-content: space-between;
     padding: 10px;
     border-radius: 10px;
