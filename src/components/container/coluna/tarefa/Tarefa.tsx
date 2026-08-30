@@ -39,7 +39,12 @@ export const Tarefa = ({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({
+    id,
+    data: {
+      tipo: "tarefa",
+    },
+  });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,

@@ -2,15 +2,17 @@ import * as S from "./styles";
 import IconeTimer from "../../../assets/iconeTimer.svg?react";
 import IconeTimerOff from "../../../assets/iconeTimerOff.svg?react";
 import IconeDelete from "../../../assets/iconeDelete.svg?react";
+import IconeMenu from "../../../assets/iconeMenu.svg?react";
 import { Button } from "../../button/Button";
 import { useEffect, useRef } from "react";
 import { Tarefa } from "./tarefa/Tarefa";
 import type { IColuna, ITarefa } from "../../../interfaces/Interfaces";
 import {
   SortableContext,
+  useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useDroppable } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
 import IconeAdd from "../../../assets/iconeAdd.svg?react";
 
 interface IColunaProps {
@@ -50,8 +52,24 @@ export const Coluna = ({
   onRemoverTarefa,
   onSolicitarRemocaoTarefa,
 }: IColunaProps) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { setNodeRef } = useDroppable({ id: coluna.id });
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: coluna.id,
+    data: {
+      tipo: "coluna",
+    },
+  });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   function removerColunaSeVazia() {
     if (coluna.texto.trim()) return;
@@ -59,7 +77,14 @@ export const Coluna = ({
     onRemoverColuna(coluna.id);
   }
 
-  function handleTituloKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+  function ajustarAlturaTitulo(textarea: HTMLTextAreaElement) {
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }
+
+  function handleTituloKeyDown(
+    event: React.KeyboardEvent<HTMLTextAreaElement>,
+  ) {
     if (event.key !== "Enter") return;
 
     event.preventDefault();
@@ -76,13 +101,31 @@ export const Coluna = ({
     inputRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    if (!inputRef.current) return;
+
+    ajustarAlturaTitulo(inputRef.current);
+  }, [coluna.texto]);
+
   return (
-    <S._Coluna ref={setNodeRef}>
+    <S._Coluna ref={setNodeRef} style={style} data-dragging={isDragging}>
       <S._HeaderColuna>
+        <S._MenuButton
+          type="button"
+          aria-label="Reordenar coluna"
+          {...attributes}
+          {...listeners}
+        >
+          <IconeMenu />
+        </S._MenuButton>
         <S._Titulo
           ref={inputRef}
+          rows={1}
           value={coluna.texto}
-          onChange={(e) => onAtualizarTitulo(coluna.id, e.target.value)}
+          onChange={(e) => {
+            onAtualizarTitulo(coluna.id, e.target.value);
+            ajustarAlturaTitulo(e.target);
+          }}
           onBlur={removerColunaSeVazia}
           onKeyDown={handleTituloKeyDown}
         ></S._Titulo>

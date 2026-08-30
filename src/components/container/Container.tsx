@@ -8,7 +8,11 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
+import {
+  arrayMove,
+  horizontalListSortingStrategy,
+  SortableContext,
+} from "@dnd-kit/sortable";
 import { Button } from "../button/Button";
 import { Coluna } from "./coluna/Coluna";
 import IconeAdd from "../../assets/iconeAdd.svg?react";
@@ -26,6 +30,8 @@ type IntervaloCronometro = {
   inicio: number;
   fim: number;
 };
+
+type DragTipo = "coluna" | "tarefa";
 
 const COLUNAS_STORAGE_KEY = "@FocalDayTrack:colunas";
 const CRONOMETROS_STORAGE_KEY = "@FocalDayTrack:cronometrosPorTarefa";
@@ -166,6 +172,12 @@ function obterIntervalosComRodando(
       fim: timestampAtual,
     },
   ];
+}
+
+function obterTipoDrag(data: unknown) {
+  const dataAtual = data as { tipo?: DragTipo } | undefined;
+
+  return dataAtual?.tipo;
 }
 
 interface IContainerProps {
@@ -522,6 +534,7 @@ export const Container = ({ onAtualizarTotalCronometrado }: IContainerProps) => 
     const { active, over } = event;
 
     if (!over || active.id === over.id) return;
+    if (obterTipoDrag(active.data.current) === "coluna") return;
 
     setColunas((colunasAtuais) => {
       const activeId = String(active.id);
@@ -557,6 +570,25 @@ export const Container = ({ onAtualizarTotalCronometrado }: IContainerProps) => 
     const { active, over } = event;
 
     if (!over || active.id === over.id) return;
+
+    if (obterTipoDrag(active.data.current) === "coluna") {
+      setColunas((colunasAtuais) => {
+        const activeId = String(active.id);
+        const overId = String(over.id);
+        const colunaDestino = encontrarColunaPorDrop(overId, colunasAtuais);
+        const oldIndex = colunasAtuais.findIndex(
+          (coluna) => coluna.id === activeId,
+        );
+        const newIndex = colunaDestino
+          ? colunasAtuais.findIndex((coluna) => coluna.id === colunaDestino.id)
+          : -1;
+
+        if (oldIndex < 0 || newIndex < 0) return colunasAtuais;
+
+        return arrayMove(colunasAtuais, oldIndex, newIndex);
+      });
+      return;
+    }
 
     setColunas((colunasAtuais) => {
       const activeId = String(active.id);
@@ -596,27 +628,32 @@ export const Container = ({ onAtualizarTotalCronometrado }: IContainerProps) => 
       onDragEnd={handleDragEnd}
     >
       <S._Container>
-        {colunas.map((coluna) => (
-          <Coluna
-            key={coluna.id}
-            coluna={coluna}
-            cronometro={cronometro}
-            colunaComCronometroAtivo={idColunaCronometroAtivo === coluna.id}
-            obterMsDecorridoTarefa={obterMsDecorridoTarefa}
-            obterCronometroTarefa={obterCronometroTarefa}
-            tarefaTemCronometroRegistrado={tarefaTemCronometroRegistrado}
-            onToggleCronometroTarefa={toggleCronometroTarefa}
-            onReiniciarCronometroTarefa={reiniciarCronometroTarefa}
-            onToggleCronometro={() => toggleCronometroColuna(coluna.id)}
-            onAdicionarTarefa={adicionarTarefa}
-            onAtualizarTarefa={atualizarTarefa}
-            onAtualizarTitulo={atualizarTituloColuna}
-            onRemoverColuna={removerColuna}
-            onSolicitarRemocaoColuna={setColunaParaExcluir}
-            onRemoverTarefa={removerTarefa}
-            onSolicitarRemocaoTarefa={setTarefaParaExcluir}
-          />
-        ))}
+        <SortableContext
+          items={colunas.map((coluna) => coluna.id)}
+          strategy={horizontalListSortingStrategy}
+        >
+          {colunas.map((coluna) => (
+            <Coluna
+              key={coluna.id}
+              coluna={coluna}
+              cronometro={cronometro}
+              colunaComCronometroAtivo={idColunaCronometroAtivo === coluna.id}
+              obterMsDecorridoTarefa={obterMsDecorridoTarefa}
+              obterCronometroTarefa={obterCronometroTarefa}
+              tarefaTemCronometroRegistrado={tarefaTemCronometroRegistrado}
+              onToggleCronometroTarefa={toggleCronometroTarefa}
+              onReiniciarCronometroTarefa={reiniciarCronometroTarefa}
+              onToggleCronometro={() => toggleCronometroColuna(coluna.id)}
+              onAdicionarTarefa={adicionarTarefa}
+              onAtualizarTarefa={atualizarTarefa}
+              onAtualizarTitulo={atualizarTituloColuna}
+              onRemoverColuna={removerColuna}
+              onSolicitarRemocaoColuna={setColunaParaExcluir}
+              onRemoverTarefa={removerTarefa}
+              onSolicitarRemocaoTarefa={setTarefaParaExcluir}
+            />
+          ))}
+        </SortableContext>
         <Button
           onClick={() => adicionarColuna()}
           text="Adicionar Coluna"
