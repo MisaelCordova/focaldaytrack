@@ -637,7 +637,9 @@ export const Container = ({ onAtualizarTotalCronometrado }: IContainerProps) => 
               key={coluna.id}
               coluna={coluna}
               cronometro={cronometro}
-              colunaComCronometroAtivo={idColunaCronometroAtivo === coluna.id}
+              colunaComCronometroAtivo={
+                cronometro && idColunaCronometroAtivo === coluna.id
+              }
               obterMsDecorridoTarefa={obterMsDecorridoTarefa}
               obterCronometroTarefa={obterCronometroTarefa}
               tarefaTemCronometroRegistrado={tarefaTemCronometroRegistrado}
