@@ -1,8 +1,10 @@
 import styled from "styled-components";
 
 export const _Page = styled.div`
-  min-width: 100vw;
-  width: max-content;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
   min-height: 100vh;
   color: ${({ theme }) => theme.colors.textPrimary};
   background-color: ${({ theme }) => theme.colors.pageBackground};
