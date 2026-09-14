@@ -6,11 +6,19 @@ interface IButtonsProps {
   text?: string;
   icone?: JSX.Element | ReactNode;
   style?: CSSProperties;
+  title?: string;
+  ariaLabel?: string;
   onClick?: () => void;
 }
 export const Button = (props: IButtonsProps) => {
   return (
-    <S._Button type="button" onClick={props.onClick} style={props.style}>
+    <S._Button
+      type="button"
+      aria-label={props.ariaLabel ?? props.title}
+      title={props.title}
+      onClick={props.onClick}
+      style={props.style}
+    >
       {props.icone && props.icone}
       {props.text}
     </S._Button>

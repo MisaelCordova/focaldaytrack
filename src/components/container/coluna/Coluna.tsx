@@ -131,6 +131,7 @@ export const Coluna = ({
         ></S._Titulo>
         <Button
           onClick={onToggleCronometro}
+          title={colunaComCronometroAtivo ? "Inativar" : "Ativar"}
           style={{ boxShadow: "none" }}
           icone={
             colunaComCronometroAtivo && cronometro ? (

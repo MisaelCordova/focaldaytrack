@@ -31,8 +31,7 @@ export const Header = ({
         <S._TextoData>{data}</S._TextoData>
         <S._TextoSaudacao>{Saudacao()}. Foque no Essencial</S._TextoSaudacao>
         <p>
-          Se você é freelancer e não esta se sentindo tão produtivo esse projeto
-          é para você
+          Tenha um controle melhor sobre o sobre o seu backlog de tarefas, bem como as horas gastas nelas.
         </p>
       </S._TextoHeader>
       <S._HeaderActions>

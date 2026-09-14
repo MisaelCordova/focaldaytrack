@@ -35,6 +35,7 @@ type DragTipo = "coluna" | "tarefa";
 
 const COLUNAS_STORAGE_KEY = "@FocalDayTrack:colunas";
 const CRONOMETROS_STORAGE_KEY = "@FocalDayTrack:cronometrosPorTarefa";
+const CRONOMETRO_COLUNA_STORAGE_KEY = "@FocalDayTrack:cronometroColuna";
 const getTimestamp = () => Date.now();
 
 function isTarefa(valor: unknown): valor is ITarefa {
@@ -121,6 +122,43 @@ function carregarCronometrosSalvos() {
   }
 }
 
+function carregarCronometroColunaSalvo() {
+  const cronometroColunaSalvo = localStorage.getItem(
+    CRONOMETRO_COLUNA_STORAGE_KEY,
+  );
+
+  if (!cronometroColunaSalvo) {
+    return {
+      ativo: false,
+      idColuna: null,
+    };
+  }
+
+  try {
+    const cronometroColuna = JSON.parse(cronometroColunaSalvo);
+
+    if (!cronometroColuna || typeof cronometroColuna !== "object") {
+      return {
+        ativo: false,
+        idColuna: null,
+      };
+    }
+
+    return {
+      ativo: Boolean(cronometroColuna.ativo),
+      idColuna:
+        typeof cronometroColuna.idColuna === "string"
+          ? cronometroColuna.idColuna
+          : null,
+    };
+  } catch {
+    return {
+      ativo: false,
+      idColuna: null,
+    };
+  }
+}
+
 function criarCronometroTarefa(): CronometroTarefa {
   return {
     rodando: false,
@@ -185,6 +223,7 @@ interface IContainerProps {
 }
 
 export const Container = ({ onAtualizarTotalCronometrado }: IContainerProps) => {
+  const [cronometroColunaInicial] = useState(carregarCronometroColunaSalvo);
   const [colunas, setColunas] = useState<IColuna[]>(carregarColunasSalvas);
   const [colunaParaExcluir, setColunaParaExcluir] = useState<IColuna | null>(
     null,
@@ -192,10 +231,10 @@ export const Container = ({ onAtualizarTotalCronometrado }: IContainerProps) => 
   const [tarefaParaExcluir, setTarefaParaExcluir] = useState<ITarefa | null>(
     null,
   );
-  const [cronometro, setCronometro] = useState(false);
+  const [cronometro, setCronometro] = useState(cronometroColunaInicial.ativo);
   const [idColunaCronometroAtivo, setIdColunaCronometroAtivo] = useState<
     string | null
-  >(null);
+  >(cronometroColunaInicial.idColuna);
   const [cronometrosPorTarefa, setCronometrosPorTarefa] = useState<
     Record<string, CronometroTarefa>
   >(carregarCronometrosSalvos);
@@ -229,6 +268,16 @@ export const Container = ({ onAtualizarTotalCronometrado }: IContainerProps) => 
       JSON.stringify(cronometrosPorTarefa),
     );
   }, [cronometrosPorTarefa]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      CRONOMETRO_COLUNA_STORAGE_KEY,
+      JSON.stringify({
+        ativo: cronometro,
+        idColuna: idColunaCronometroAtivo,
+      }),
+    );
+  }, [cronometro, idColunaCronometroAtivo]);
 
   useEffect(() => {
     onAtualizarTotalCronometrado(totalCronometrado);

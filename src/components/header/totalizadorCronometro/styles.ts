@@ -7,7 +7,7 @@ export const _Totalizador = styled.div`
     padding: 10px;
     border-radius: 20px;
     color: ${({ theme }) => theme.colors.textMuted};
-    background-color: ${({ theme }) => theme.colors.boardBackground};
+    background-color: ${({ theme }) => theme.colors.surface};
 
     span {
         font-weight: bold;

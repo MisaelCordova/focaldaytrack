@@ -30,14 +30,14 @@ export const _MenuButton = styled.button`
 export const _Coluna = styled.div`
     display : flex;
     flex-direction: column;
-    background-color: ${({ theme }) => theme.colors.surfaceMuted};
+    background-color: ${({ theme }) => theme.colors.boardBackground};
     min-width: 280px;
     width: 280px;
     flex-shrink: 0;
     padding: 10px;
     gap: 10px;
     border-radius: 10px;
-    border: 2px dashed ${({ theme }) => theme.colors.borderAccent};
+    
     align-self: flex-start;
 
     &[data-dragging="true"] {

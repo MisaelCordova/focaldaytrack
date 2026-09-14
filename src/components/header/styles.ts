@@ -7,7 +7,7 @@ export const _Header = styled.header`
     align-items: center;
     padding: 20px;
     border: 2px solid ${({ theme }) => theme.colors.border};
-    background-color: ${({ theme }) => theme.colors.surface};
+    background-color: ${({ theme }) => theme.colors.boardBackground};
     color: ${({ theme }) => theme.colors.textPrimary};
     width: 100%;
 `
