@@ -1,77 +1,55 @@
-# React + TypeScript + Vite
+# FocalDayTrack
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Quadro Kanban para organizar tarefas e acompanhar o tempo dedicado a elas. As colunas definem as etapas do fluxo de trabalho e os cards representam as tarefas.
 
-Currently, two official plugins are available:
+## Usar o quadro
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Crie colunas como **Backlog**, **A fazer**, **Em andamento** e **Concluído**.
+2. Adicione cards com as tarefas em cada coluna.
+3. Arraste os cards entre colunas para atualizar sua etapa ou dentro da mesma coluna para ordenar as tarefas.
+4. Arraste o ícone de menu no canto superior esquerdo da coluna para mudar sua posição.
+5. Ative o cronômetro da coluna de trabalho para cronometrar tarefas criadas nela ou movidas para ela.
 
-## React Compiler
+Os nomes das colunas são livres. O aplicativo não exige etapas predefinidas nem aplica regras especiais a uma coluna chamada "Concluído".
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+## Funcionalidades
 
-Note: This will impact Vite dev & build performances.
+- Criação e edição de colunas e tarefas, com campos de altura ajustável.
+- Remoção de itens vazios ao perder o foco ou pressionar Enter.
+- Exclusão de colunas e tarefas com confirmação.
+- Drag and drop de colunas e cards.
+- Cronômetros por tarefa e totalizador sem duplicar períodos simultâneos.
+- Persistência local do quadro, cronômetros e preferências.
+- Alternância entre tema claro e escuro.
 
-## Expanding the ESLint configuration
+## Executar localmente
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Com Node.js e npm instalados, execute na raiz do projeto:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```sh
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Abra o endereço informado pelo Vite no terminal.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Comando | Finalidade |
+| --- | --- |
+| `npm run dev` | Inicia o servidor de desenvolvimento. |
+| `npm run build` | Verifica o TypeScript e gera a aplicação em `dist/`. |
+| `npm run preview` | Serve a versão gerada pelo build localmente. |
+| `npm run lint` | Verifica o código com ESLint. |
+| `npm run lint:fix` | Aplica as correções automáticas disponíveis. |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Tecnologias
 
-```
+React, TypeScript, Vite, styled-components e @dnd-kit. O projeto também utiliza ESLint, React Compiler e vite-plugin-svgr para importar SVGs como componentes React.
+
+## Documentação
+
+- [Guia de uso e organização do projeto](docs/guia-do-projeto.md): conceitos do Kanban, operações, cronômetros, armazenamento e estrutura do código.
+- [Registro da implementação de drag and drop](docs/drag-and-drop-tarefas.md): documento anterior sobre o movimento de tarefas. Alguns trechos retratam uma versão anterior; consulte o guia para a estrutura atual.
+
+## Armazenamento
+
+Os dados ficam no `localStorage` do navegador. Não há backend nem sincronização entre dispositivos. Limpar os dados do site remove os registros locais; outro navegador ou outro endereço da aplicação possui armazenamento separado.
