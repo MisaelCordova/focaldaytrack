@@ -10,4 +10,5 @@ export default defineConfig({
     svgr(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+   base: '/focaldaytrack/',
 })
