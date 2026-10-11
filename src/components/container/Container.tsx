@@ -13,10 +13,10 @@ import {
   horizontalListSortingStrategy,
   SortableContext,
 } from "@dnd-kit/sortable";
-import { Button } from "../button/Button";
+import { Button } from "../Button/Button";
 import { Coluna } from "./coluna/Coluna";
 import IconeAdd from "../../assets/iconeAdd.svg?react";
-import { ConfirmModal } from "../confirmModal/ConfirmModal";
+import { ConfirmModal } from "../ConfirmModal/ConfirmModal";
 import * as S from "./styles";
 import type { IColuna, ITarefa } from "../../interfaces/Interfaces";
 
